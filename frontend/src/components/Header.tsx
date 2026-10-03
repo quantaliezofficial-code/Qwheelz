@@ -204,7 +204,7 @@ export function Header() {
                 <img
                   src="/logo-wide.png"
                   alt="QWheelz"
-                  className="h-9 sm:h-11 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+                  className="h-7 sm:h-8 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02]"
                 />
                 {user?.role === "admin" && (
                   <span className="text-[10px] sm:text-xs tracking-wider uppercase text-white bg-blue-900 font-extrabold px-2 py-0.5 rounded-md border border-blue-800 self-center">
