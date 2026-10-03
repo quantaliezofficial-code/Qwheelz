@@ -776,3 +776,81 @@ class SavedSearch(Base):
 
     user: Mapped["User"] = relationship()
 
+
+class Appointment(Base):
+    """Test drive and vehicle inspection appointment booking."""
+    __tablename__ = "appointments"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    listing_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("vehicle_listings.id", ondelete="CASCADE"))
+    buyer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    seller_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    appointment_type: Mapped[str] = mapped_column(default="test_drive")  # test_drive | inspection
+    scheduled_at: Mapped[datetime]
+    time_slot: Mapped[str | None]
+    status: Mapped[str] = mapped_column(default="requested")  # requested | confirmed | rescheduled | cancelled | completed | no_show
+    notes: Mapped[str | None]
+    created_at: Mapped[datetime] = mapped_column(server_default=text("now()"))
+    updated_at: Mapped[datetime] = mapped_column(server_default=text("now()"))
+
+    listing: Mapped["VehicleListing"] = relationship()
+    buyer: Mapped["User"] = relationship(foreign_keys=[buyer_id])
+    seller: Mapped["User"] = relationship(foreign_keys=[seller_id])
+
+
+class VehicleOffer(Base):
+    """Negotiated price offer on a vehicle listing."""
+    __tablename__ = "vehicle_offers"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    listing_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("vehicle_listings.id", ondelete="CASCADE"))
+    buyer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    seller_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    offer_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2))
+    counter_amount: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    status: Mapped[str] = mapped_column(default="submitted")  # submitted | countered | accepted | rejected | expired
+    message: Mapped[str | None]
+    expires_at: Mapped[datetime | None]
+    created_at: Mapped[datetime] = mapped_column(server_default=text("now()"))
+    updated_at: Mapped[datetime] = mapped_column(server_default=text("now()"))
+
+    listing: Mapped["VehicleListing"] = relationship()
+    buyer: Mapped["User"] = relationship(foreign_keys=[buyer_id])
+    seller: Mapped["User"] = relationship(foreign_keys=[seller_id])
+
+
+class SupportTicket(Base):
+    """Context-aware customer/seller support ticket."""
+    __tablename__ = "support_tickets"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    subject: Mapped[str]
+    category: Mapped[str] = mapped_column(default="general")  # general | vehicle | appointment | payment | report
+    listing_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("vehicle_listings.id", ondelete="SET NULL"))
+    appointment_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("appointments.id", ondelete="SET NULL"))
+    status: Mapped[str] = mapped_column(default="open")  # open | in_progress | resolved | closed
+    created_at: Mapped[datetime] = mapped_column(server_default=text("now()"))
+    updated_at: Mapped[datetime] = mapped_column(server_default=text("now()"))
+
+    user: Mapped["User"] = relationship(foreign_keys=[user_id])
+    listing: Mapped["VehicleListing | None"] = relationship(foreign_keys=[listing_id])
+    appointment: Mapped["Appointment | None"] = relationship(foreign_keys=[appointment_id])
+    messages: Mapped[list["SupportMessage"]] = relationship(
+        back_populates="ticket", cascade="all, delete-orphan", order_by="SupportMessage.created_at"
+    )
+
+
+class SupportMessage(Base):
+    """A message in a support ticket thread."""
+    __tablename__ = "support_messages"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    ticket_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("support_tickets.id", ondelete="CASCADE"))
+    sender_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    content: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(server_default=text("now()"))
+
+    ticket: Mapped["SupportTicket"] = relationship(back_populates="messages")
+    sender: Mapped["User"] = relationship(foreign_keys=[sender_id])
+

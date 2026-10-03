@@ -16,6 +16,7 @@ import asyncio
 import contextlib
 import logging
 import uuid
+from decimal import Decimal
 from datetime import datetime, timezone
 
 from fastapi import Depends, FastAPI, HTTPException, Query, UploadFile
@@ -26,7 +27,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.db import get_db
-from app.models.core import Subscription, User, VehicleListing
+from app.models.core import (
+    Appointment,
+    Booking,
+    SavedSearch,
+    Subscription,
+    SupportMessage,
+    SupportTicket,
+    User,
+    VehicleListing,
+    VehicleOffer,
+)
 from app.modules.admin import service as admin_service
 from app.modules.auth import service as auth_service
 from app.modules.auth.dependencies import (
@@ -813,7 +824,7 @@ async def create_booking(
     
     new_booking = Booking(
         listing_id=booking.listing_id,
-        buyer_id=current_user.user.id,
+        buyer_id=current_user.id,
         amount=booking.amount,
         status='confirmed' # Mocking instant confirmation
     )
@@ -842,7 +853,7 @@ async def create_saved_search(
 ):
     from app.models.core import SavedSearch
     new_search = SavedSearch(
-        user_id=current_user.user.id,
+        user_id=current_user.id,
         name=req.name,
         filters=req.filters
     )
@@ -857,7 +868,818 @@ async def list_saved_searches(
     session: AsyncSession = Depends(get_db)
 ):
     from app.models.core import SavedSearch
-    stmt = select(SavedSearch).where(SavedSearch.user_id == current_user.user.id).order_by(SavedSearch.created_at.desc())
+    stmt = select(SavedSearch).where(SavedSearch.user_id == current_user.id).order_by(SavedSearch.created_at.desc())
     result = await session.scalars(stmt)
     return list(result.all())
+
+@app.delete("/api/v1/saved-searches/{search_id}", status_code=204)
+async def delete_saved_search(
+    search_id: uuid.UUID,
+    current_user: CurrentUser = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db)
+):
+    from app.models.core import SavedSearch
+    search = await session.get(SavedSearch, search_id)
+    if not search or search.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Saved search not found")
+    await session.delete(search)
+    await session.commit()
+
+
+# =======================================================================
+# Feature Book Module 8: Appointments & Test Drives
+# =======================================================================
+
+class AppointmentCreate(BaseModel):
+    listing_id: uuid.UUID
+    appointment_type: str = "test_drive"  # test_drive | inspection
+    scheduled_at: datetime
+    time_slot: str | None = None
+    notes: str | None = None
+
+class AppointmentStatusUpdate(BaseModel):
+    status: str  # confirmed | rescheduled | cancelled | completed | no_show
+    notes: str | None = None
+    scheduled_at: datetime | None = None
+    time_slot: str | None = None
+
+class AppointmentOut(BaseModel):
+    id: uuid.UUID
+    listing_id: uuid.UUID
+    listing_title: str
+    listing_slug: str
+    buyer_id: uuid.UUID
+    buyer_name: str
+    buyer_phone: str
+    seller_id: uuid.UUID
+    seller_name: str
+    seller_phone: str
+    appointment_type: str
+    scheduled_at: datetime
+    time_slot: str | None
+    status: str
+    notes: str | None
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+@app.post("/api/v1/appointments", response_model=AppointmentOut, status_code=201)
+async def create_appointment(
+    payload: AppointmentCreate,
+    current: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.core import Appointment, VehicleListing
+    listing = await db.get(VehicleListing, payload.listing_id)
+    if not listing:
+        raise HTTPException(status_code=404, detail="Vehicle listing not found")
+    if listing.seller_id == current.id:
+        raise HTTPException(status_code=400, detail="Cannot book appointment on your own listing")
+    
+    seller = await db.get(User, listing.seller_id)
+    buyer = await db.get(User, current.id)
+
+    appt = Appointment(
+        listing_id=listing.id,
+        buyer_id=current.id,
+        seller_id=listing.seller_id,
+        appointment_type=payload.appointment_type,
+        scheduled_at=payload.scheduled_at,
+        time_slot=payload.time_slot,
+        status="requested",
+        notes=payload.notes,
+    )
+    db.add(appt)
+    await db.commit()
+    await db.refresh(appt)
+
+    buyer_name = buyer.name if buyer else "Buyer"
+    buyer_phone = buyer.phone if buyer else ""
+    await notifications_service.create_notification(
+        db, listing.seller_id, "appointment_requested",
+        f"New {payload.appointment_type.replace('_', ' ')} requested for '{listing.title}' by {buyer_name}",
+        entity_type="appointment", entity_id=appt.id
+    )
+
+    return AppointmentOut(
+        id=appt.id,
+        listing_id=listing.id,
+        listing_title=listing.title,
+        listing_slug=listing.slug,
+        buyer_id=current.id,
+        buyer_name=buyer_name,
+        buyer_phone=buyer_phone,
+        seller_id=seller.id if seller else listing.seller_id,
+        seller_name=seller.name if seller else "Seller",
+        seller_phone=seller.phone if seller else "",
+        appointment_type=appt.appointment_type,
+        scheduled_at=appt.scheduled_at,
+        time_slot=appt.time_slot,
+        status=appt.status,
+        notes=appt.notes,
+        created_at=appt.created_at,
+        updated_at=appt.updated_at,
+    )
+
+@app.get("/api/v1/appointments", response_model=list[AppointmentOut])
+async def list_appointments(
+    status: str | None = None,
+    current: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.core import Appointment, VehicleListing
+    stmt = (
+        select(Appointment, VehicleListing, User)
+        .join(VehicleListing, Appointment.listing_id == VehicleListing.id)
+        .join(User, Appointment.buyer_id == User.id)
+        .order_by(Appointment.scheduled_at.desc())
+    )
+    if current.role == "seller":
+        stmt = stmt.where(Appointment.seller_id == current.id)
+    elif current.role == "admin":
+        pass
+    else:
+        stmt = stmt.where(Appointment.buyer_id == current.id)
+    
+    if status:
+        stmt = stmt.where(Appointment.status == status)
+
+    result = await db.execute(stmt)
+    rows = result.all()
+    
+    out = []
+    for appt, listing, buyer in rows:
+        seller = await db.get(User, appt.seller_id)
+        out.append(AppointmentOut(
+            id=appt.id,
+            listing_id=listing.id,
+            listing_title=listing.title,
+            listing_slug=listing.slug,
+            buyer_id=buyer.id,
+            buyer_name=buyer.name,
+            buyer_phone=buyer.phone,
+            seller_id=appt.seller_id,
+            seller_name=seller.name if seller else "Seller",
+            seller_phone=seller.phone if seller else "",
+            appointment_type=appt.appointment_type,
+            scheduled_at=appt.scheduled_at,
+            time_slot=appt.time_slot,
+            status=appt.status,
+            notes=appt.notes,
+            created_at=appt.created_at,
+            updated_at=appt.updated_at,
+        ))
+    return out
+
+@app.patch("/api/v1/appointments/{appointment_id}/status", response_model=AppointmentOut)
+async def update_appointment_status(
+    appointment_id: uuid.UUID,
+    payload: AppointmentStatusUpdate,
+    current: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.core import Appointment, VehicleListing
+    appt = await db.get(Appointment, appointment_id)
+    if not appt:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+    
+    if current.role != "admin" and current.id != appt.seller_id and current.id != appt.buyer_id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this appointment")
+    
+    appt.status = payload.status
+    if payload.notes:
+        appt.notes = payload.notes
+    if payload.scheduled_at:
+        appt.scheduled_at = payload.scheduled_at
+    if payload.time_slot:
+        appt.time_slot = payload.time_slot
+    appt.updated_at = datetime.now(timezone.utc)
+    
+    await db.commit()
+    await db.refresh(appt)
+
+    listing = await db.get(VehicleListing, appt.listing_id)
+    buyer = await db.get(User, appt.buyer_id)
+    seller = await db.get(User, appt.seller_id)
+
+    target_id = appt.buyer_id if current.id == appt.seller_id else appt.seller_id
+    await notifications_service.create_notification(
+        db, target_id, "appointment_status",
+        f"Appointment for '{listing.title if listing else 'vehicle'}' updated to: {payload.status}",
+        entity_type="appointment", entity_id=appt.id
+    )
+
+    return AppointmentOut(
+        id=appt.id,
+        listing_id=appt.listing_id,
+        listing_title=listing.title if listing else "Vehicle",
+        listing_slug=listing.slug if listing else "",
+        buyer_id=buyer.id if buyer else appt.buyer_id,
+        buyer_name=buyer.name if buyer else "Buyer",
+        buyer_phone=buyer.phone if buyer else "",
+        seller_id=seller.id if seller else appt.seller_id,
+        seller_name=seller.name if seller else "Seller",
+        seller_phone=seller.phone if seller else "",
+        appointment_type=appt.appointment_type,
+        scheduled_at=appt.scheduled_at,
+        time_slot=appt.time_slot,
+        status=appt.status,
+        notes=appt.notes,
+        created_at=appt.created_at,
+        updated_at=appt.updated_at,
+    )
+
+@app.get("/api/v1/admin/appointments", response_model=list[AppointmentOut])
+async def admin_list_appointments(
+    current: CurrentUser = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.core import Appointment, VehicleListing
+    stmt = (
+        select(Appointment, VehicleListing, User)
+        .join(VehicleListing, Appointment.listing_id == VehicleListing.id)
+        .join(User, Appointment.buyer_id == User.id)
+        .order_by(Appointment.created_at.desc())
+    )
+    result = await db.execute(stmt)
+    rows = result.all()
+    out = []
+    for appt, listing, buyer in rows:
+        seller = await db.get(User, appt.seller_id)
+        out.append(AppointmentOut(
+            id=appt.id,
+            listing_id=listing.id,
+            listing_title=listing.title,
+            listing_slug=listing.slug,
+            buyer_id=buyer.id,
+            buyer_name=buyer.name,
+            buyer_phone=buyer.phone,
+            seller_id=appt.seller_id,
+            seller_name=seller.name if seller else "Seller",
+            seller_phone=seller.phone if seller else "",
+            appointment_type=appt.appointment_type,
+            scheduled_at=appt.scheduled_at,
+            time_slot=appt.time_slot,
+            status=appt.status,
+            notes=appt.notes,
+            created_at=appt.created_at,
+            updated_at=appt.updated_at,
+        ))
+    return out
+
+
+# =======================================================================
+# Feature Book Module 8: Vehicle Offers (Negotiated Sale)
+# =======================================================================
+
+class OfferCreate(BaseModel):
+    listing_id: uuid.UUID
+    offer_amount: Decimal
+    message: str | None = None
+
+class OfferCounterRequest(BaseModel):
+    counter_amount: Decimal
+    message: str | None = None
+
+class OfferOut(BaseModel):
+    id: uuid.UUID
+    listing_id: uuid.UUID
+    listing_title: str
+    listing_slug: str
+    listing_price: Decimal
+    buyer_id: uuid.UUID
+    buyer_name: str
+    seller_id: uuid.UUID
+    seller_name: str
+    offer_amount: Decimal
+    counter_amount: Decimal | None
+    status: str
+    message: str | None
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+@app.post("/api/v1/offers", response_model=OfferOut, status_code=201)
+async def create_offer(
+    payload: OfferCreate,
+    current: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.core import VehicleOffer, VehicleListing
+    listing = await db.get(VehicleListing, payload.listing_id)
+    if not listing:
+        raise HTTPException(status_code=404, detail="Vehicle listing not found")
+    if listing.seller_id == current.id:
+        raise HTTPException(status_code=400, detail="Cannot make an offer on your own vehicle")
+    
+    buyer = await db.get(User, current.id)
+    buyer_name = buyer.name if buyer else "Buyer"
+
+    offer = VehicleOffer(
+        listing_id=listing.id,
+        buyer_id=current.id,
+        seller_id=listing.seller_id,
+        offer_amount=payload.offer_amount,
+        status="submitted",
+        message=payload.message,
+    )
+    db.add(offer)
+    await db.commit()
+    await db.refresh(offer)
+
+    seller = await db.get(User, listing.seller_id)
+    await notifications_service.create_notification(
+        db, listing.seller_id, "offer_received",
+        f"New offer of ₹{payload.offer_amount:,.0f} received on '{listing.title}'",
+        entity_type="offer", entity_id=offer.id
+    )
+
+    return OfferOut(
+        id=offer.id,
+        listing_id=listing.id,
+        listing_title=listing.title,
+        listing_slug=listing.slug,
+        listing_price=listing.price,
+        buyer_id=current.id,
+        buyer_name=buyer_name,
+        seller_id=listing.seller_id,
+        seller_name=seller.name if seller else "Seller",
+        offer_amount=offer.offer_amount,
+        counter_amount=offer.counter_amount,
+        status=offer.status,
+        message=offer.message,
+        created_at=offer.created_at,
+        updated_at=offer.updated_at,
+    )
+
+@app.get("/api/v1/offers", response_model=list[OfferOut])
+async def list_offers(
+    current: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.core import VehicleOffer, VehicleListing
+    stmt = (
+        select(VehicleOffer, VehicleListing, User)
+        .join(VehicleListing, VehicleOffer.listing_id == VehicleListing.id)
+        .join(User, VehicleOffer.buyer_id == User.id)
+        .order_by(VehicleOffer.created_at.desc())
+    )
+    if current.role == "seller":
+        stmt = stmt.where(VehicleOffer.seller_id == current.id)
+    elif current.role == "admin":
+        pass
+    else:
+        stmt = stmt.where(VehicleOffer.buyer_id == current.id)
+
+    result = await db.execute(stmt)
+    rows = result.all()
+    out = []
+    for offer, listing, buyer in rows:
+        seller = await db.get(User, offer.seller_id)
+        out.append(OfferOut(
+            id=offer.id,
+            listing_id=listing.id,
+            listing_title=listing.title,
+            listing_slug=listing.slug,
+            listing_price=listing.price,
+            buyer_id=buyer.id,
+            buyer_name=buyer.name,
+            seller_id=offer.seller_id,
+            seller_name=seller.name if seller else "Seller",
+            offer_amount=offer.offer_amount,
+            counter_amount=offer.counter_amount,
+            status=offer.status,
+            message=offer.message,
+            created_at=offer.created_at,
+            updated_at=offer.updated_at,
+        ))
+    return out
+
+@app.post("/api/v1/offers/{offer_id}/accept", response_model=OfferOut)
+async def accept_offer(
+    offer_id: uuid.UUID,
+    current: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.core import VehicleOffer, VehicleListing
+    offer = await db.get(VehicleOffer, offer_id)
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+    if current.id != offer.seller_id and current.role != "admin":
+        raise HTTPException(status_code=403, detail="Only the vehicle seller can accept this offer")
+    
+    offer.status = "accepted"
+    offer.updated_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(offer)
+
+    listing = await db.get(VehicleListing, offer.listing_id)
+    buyer = await db.get(User, offer.buyer_id)
+    seller = await db.get(User, offer.seller_id)
+
+    await notifications_service.create_notification(
+        db, offer.buyer_id, "offer_accepted",
+        f"Congratulations! Your offer on '{listing.title if listing else 'vehicle'}' was accepted by the seller.",
+        entity_type="offer", entity_id=offer.id
+    )
+
+    return OfferOut(
+        id=offer.id,
+        listing_id=offer.listing_id,
+        listing_title=listing.title if listing else "Vehicle",
+        listing_slug=listing.slug if listing else "",
+        listing_price=listing.price if listing else offer.offer_amount,
+        buyer_id=offer.buyer_id,
+        buyer_name=buyer.name if buyer else "Buyer",
+        seller_id=offer.seller_id,
+        seller_name=seller.name if seller else "Seller",
+        offer_amount=offer.offer_amount,
+        counter_amount=offer.counter_amount,
+        status=offer.status,
+        message=offer.message,
+        created_at=offer.created_at,
+        updated_at=offer.updated_at,
+    )
+
+@app.post("/api/v1/offers/{offer_id}/reject", response_model=OfferOut)
+async def reject_offer(
+    offer_id: uuid.UUID,
+    current: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.core import VehicleOffer, VehicleListing
+    offer = await db.get(VehicleOffer, offer_id)
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+    if current.id != offer.seller_id and current.role != "admin":
+        raise HTTPException(status_code=403, detail="Only the vehicle seller can reject this offer")
+    
+    offer.status = "rejected"
+    offer.updated_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(offer)
+
+    listing = await db.get(VehicleListing, offer.listing_id)
+    buyer = await db.get(User, offer.buyer_id)
+    seller = await db.get(User, offer.seller_id)
+
+    await notifications_service.create_notification(
+        db, offer.buyer_id, "offer_rejected",
+        f"Your offer on '{listing.title if listing else 'vehicle'}' was declined.",
+        entity_type="offer", entity_id=offer.id
+    )
+
+    return OfferOut(
+        id=offer.id,
+        listing_id=offer.listing_id,
+        listing_title=listing.title if listing else "Vehicle",
+        listing_slug=listing.slug if listing else "",
+        listing_price=listing.price if listing else offer.offer_amount,
+        buyer_id=offer.buyer_id,
+        buyer_name=buyer.name if buyer else "Buyer",
+        seller_id=offer.seller_id,
+        seller_name=seller.name if seller else "Seller",
+        offer_amount=offer.offer_amount,
+        counter_amount=offer.counter_amount,
+        status=offer.status,
+        message=offer.message,
+        created_at=offer.created_at,
+        updated_at=offer.updated_at,
+    )
+
+@app.post("/api/v1/offers/{offer_id}/counter", response_model=OfferOut)
+async def counter_offer(
+    offer_id: uuid.UUID,
+    payload: OfferCounterRequest,
+    current: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.core import VehicleOffer, VehicleListing
+    offer = await db.get(VehicleOffer, offer_id)
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+    if current.id != offer.seller_id and current.role != "admin":
+        raise HTTPException(status_code=403, detail="Only the vehicle seller can counter this offer")
+    
+    offer.counter_amount = payload.counter_amount
+    offer.status = "countered"
+    if payload.message:
+        offer.message = payload.message
+    offer.updated_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(offer)
+
+    listing = await db.get(VehicleListing, offer.listing_id)
+    buyer = await db.get(User, offer.buyer_id)
+    seller = await db.get(User, offer.seller_id)
+
+    await notifications_service.create_notification(
+        db, offer.buyer_id, "offer_countered",
+        f"The seller made a counter-offer of ₹{payload.counter_amount:,.0f} for '{listing.title if listing else 'vehicle'}'",
+        entity_type="offer", entity_id=offer.id
+    )
+
+    return OfferOut(
+        id=offer.id,
+        listing_id=offer.listing_id,
+        listing_title=listing.title if listing else "Vehicle",
+        listing_slug=listing.slug if listing else "",
+        listing_price=listing.price if listing else offer.offer_amount,
+        buyer_id=offer.buyer_id,
+        buyer_name=buyer.name if buyer else "Buyer",
+        seller_id=offer.seller_id,
+        seller_name=seller.name if seller else "Seller",
+        offer_amount=offer.offer_amount,
+        counter_amount=offer.counter_amount,
+        status=offer.status,
+        message=offer.message,
+        created_at=offer.created_at,
+        updated_at=offer.updated_at,
+    )
+
+
+# =======================================================================
+# Feature Book Module 11: Support Tickets with Context Inheritance
+# =======================================================================
+
+class SupportTicketCreate(BaseModel):
+    subject: str
+    category: str = "general"
+    message: str
+    listing_id: uuid.UUID | None = None
+    appointment_id: uuid.UUID | None = None
+
+class SupportMessageCreate(BaseModel):
+    content: str
+
+class SupportTicketStatusUpdate(BaseModel):
+    status: str
+
+class SupportMessageOut(BaseModel):
+    id: uuid.UUID
+    ticket_id: uuid.UUID
+    sender_id: uuid.UUID
+    sender_name: str
+    sender_role: str
+    content: str
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class SupportTicketOut(BaseModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    user_name: str
+    user_email: str | None
+    subject: str
+    category: str
+    listing_id: uuid.UUID | None
+    listing_title: str | None
+    appointment_id: uuid.UUID | None
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    messages: list[SupportMessageOut] = []
+    model_config = ConfigDict(from_attributes=True)
+
+@app.post("/api/v1/support/tickets", response_model=SupportTicketOut, status_code=201)
+async def create_support_ticket(
+    payload: SupportTicketCreate,
+    current: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    user = await db.get(User, current.id)
+    user_name = user.name if user else "User"
+    user_email = user.email if user else None
+
+    ticket = SupportTicket(
+        user_id=current.id,
+        subject=payload.subject,
+        category=payload.category,
+        listing_id=payload.listing_id,
+        appointment_id=payload.appointment_id,
+        status="open",
+    )
+    db.add(ticket)
+    await db.flush()
+
+    first_msg = SupportMessage(
+        ticket_id=ticket.id,
+        sender_id=current.id,
+        content=payload.message,
+    )
+    db.add(first_msg)
+    await db.commit()
+    await db.refresh(ticket)
+    await db.refresh(first_msg)
+
+    listing_title = None
+    if payload.listing_id:
+        listing = await db.get(VehicleListing, payload.listing_id)
+        if listing:
+            listing_title = listing.title
+
+    msg_out = SupportMessageOut(
+        id=first_msg.id,
+        ticket_id=ticket.id,
+        sender_id=current.id,
+        sender_name=user_name,
+        sender_role=current.role,
+        content=first_msg.content,
+        created_at=first_msg.created_at,
+    )
+
+    return SupportTicketOut(
+        id=ticket.id,
+        user_id=current.id,
+        user_name=user_name,
+        user_email=user_email,
+        subject=ticket.subject,
+        category=ticket.category,
+        listing_id=ticket.listing_id,
+        listing_title=listing_title,
+        appointment_id=ticket.appointment_id,
+        status=ticket.status,
+        created_at=ticket.created_at,
+        updated_at=ticket.updated_at,
+        messages=[msg_out],
+    )
+
+@app.get("/api/v1/support/tickets", response_model=list[SupportTicketOut])
+async def list_support_tickets(
+    status: str | None = None,
+    current: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.core import SupportTicket, SupportMessage, VehicleListing
+    stmt = select(SupportTicket).order_by(SupportTicket.updated_at.desc())
+    if current.role != "admin":
+        stmt = stmt.where(SupportTicket.user_id == current.id)
+    if status:
+        stmt = stmt.where(SupportTicket.status == status)
+
+    result = await db.scalars(stmt)
+    tickets = list(result.all())
+
+    out = []
+    for t in tickets:
+        user = await db.get(User, t.user_id)
+        listing_title = None
+        if t.listing_id:
+            listing = await db.get(VehicleListing, t.listing_id)
+            if listing:
+                listing_title = listing.title
+
+        msg_stmt = select(SupportMessage).where(SupportMessage.ticket_id == t.id).order_by(SupportMessage.created_at.asc())
+        msgs = list((await db.scalars(msg_stmt)).all())
+        msg_outs = []
+        for m in msgs:
+            sender = await db.get(User, m.sender_id)
+            msg_outs.append(SupportMessageOut(
+                id=m.id,
+                ticket_id=m.ticket_id,
+                sender_id=m.sender_id,
+                sender_name=sender.name if sender else "User",
+                sender_role=sender.role if sender else "buyer",
+                content=m.content,
+                created_at=m.created_at,
+            ))
+
+        out.append(SupportTicketOut(
+            id=t.id,
+            user_id=t.user_id,
+            user_name=user.name if user else "User",
+            user_email=user.email if user else None,
+            subject=t.subject,
+            category=t.category,
+            listing_id=t.listing_id,
+            listing_title=listing_title,
+            appointment_id=t.appointment_id,
+            status=t.status,
+            created_at=t.created_at,
+            updated_at=t.updated_at,
+            messages=msg_outs,
+        ))
+    return out
+
+@app.get("/api/v1/support/tickets/{ticket_id}", response_model=SupportTicketOut)
+async def get_support_ticket(
+    ticket_id: uuid.UUID,
+    current: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.core import SupportTicket, SupportMessage, VehicleListing
+    t = await db.get(SupportTicket, ticket_id)
+    if not t:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    if current.role != "admin" and t.user_id != current.id:
+        raise HTTPException(status_code=403, detail="Not authorized to view this ticket")
+
+    user = await db.get(User, t.user_id)
+    listing_title = None
+    if t.listing_id:
+        listing = await db.get(VehicleListing, t.listing_id)
+        if listing:
+            listing_title = listing.title
+
+    msg_stmt = select(SupportMessage).where(SupportMessage.ticket_id == t.id).order_by(SupportMessage.created_at.asc())
+    msgs = list((await db.scalars(msg_stmt)).all())
+    msg_outs = []
+    for m in msgs:
+        sender = await db.get(User, m.sender_id)
+        msg_outs.append(SupportMessageOut(
+            id=m.id,
+            ticket_id=m.ticket_id,
+            sender_id=m.sender_id,
+            sender_name=sender.name if sender else "User",
+            sender_role=sender.role if sender else "buyer",
+            content=m.content,
+            created_at=m.created_at,
+        ))
+
+    return SupportTicketOut(
+        id=t.id,
+        user_id=t.user_id,
+        user_name=user.name if user else "User",
+        user_email=user.email if user else None,
+        subject=t.subject,
+        category=t.category,
+        listing_id=t.listing_id,
+        listing_title=listing_title,
+        appointment_id=t.appointment_id,
+        status=t.status,
+        created_at=t.created_at,
+        updated_at=t.updated_at,
+        messages=msg_outs,
+    )
+
+@app.post("/api/v1/support/tickets/{ticket_id}/messages", response_model=SupportMessageOut, status_code=201)
+async def add_support_ticket_message(
+    ticket_id: uuid.UUID,
+    payload: SupportMessageCreate,
+    current: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.core import SupportTicket, SupportMessage
+    ticket = await db.get(SupportTicket, ticket_id)
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    if current.role != "admin" and ticket.user_id != current.id:
+        raise HTTPException(status_code=403, detail="Not authorized to reply to this ticket")
+
+    sender = await db.get(User, current.id)
+    sender_name = sender.name if sender else "User"
+
+    msg = SupportMessage(
+        ticket_id=ticket.id,
+        sender_id=current.id,
+        content=payload.content,
+    )
+    db.add(msg)
+    ticket.updated_at = datetime.now(timezone.utc)
+    if current.role == "admin" and ticket.status == "open":
+        ticket.status = "in_progress"
+    await db.commit()
+    await db.refresh(msg)
+
+    if current.role == "admin":
+        await notifications_service.create_notification(
+            db, ticket.user_id, "support_reply",
+            f"Support reply received on ticket: '{ticket.subject}'",
+            entity_type="support_ticket", entity_id=ticket.id
+        )
+
+    return SupportMessageOut(
+        id=msg.id,
+        ticket_id=ticket.id,
+        sender_id=current.id,
+        sender_name=sender_name,
+        sender_role=current.role,
+        content=msg.content,
+        created_at=msg.created_at,
+    )
+
+@app.patch("/api/v1/support/tickets/{ticket_id}/status", response_model=SupportTicketOut)
+async def update_support_ticket_status(
+    ticket_id: uuid.UUID,
+    payload: SupportTicketStatusUpdate,
+    current: CurrentUser = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.core import SupportTicket
+    ticket = await db.get(SupportTicket, ticket_id)
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+
+    ticket.status = payload.status
+    ticket.updated_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(ticket)
+
+    await notifications_service.create_notification(
+        db, ticket.user_id, "support_status",
+        f"Your support ticket '{ticket.subject}' has been marked as {payload.status}.",
+        entity_type="support_ticket", entity_id=ticket.id
+    )
+
+    return await get_support_ticket(ticket_id, current, db)
 

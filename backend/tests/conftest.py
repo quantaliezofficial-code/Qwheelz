@@ -32,6 +32,7 @@ from app.modules.auth.security import create_access_token, hash_password
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 _TABLES_IN_FK_SAFE_TRUNCATE_ORDER = [
+    "support_messages", "support_tickets", "vehicle_offers", "appointments",
     "proposals", "technology_requirements", "company_profiles",
     "enquiry_messages", "vehicle_enquiries", "vehicle_favourites", "listing_features",
     "vehicle_images", "vehicle_documents", "reviews", "reports", "payments",

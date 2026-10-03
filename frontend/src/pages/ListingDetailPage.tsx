@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
-  Calendar, Camera, Flag, Fuel, Gauge, Heart, Palette, Settings2, ShieldCheck, Star, Truck, Users, Activity, Zap, Ruler, Wallet, Check, PieChart, LineChart, Flame, RotateCcw, BarChart2, CheckCircle2, FileText, Lock, Key, Wrench, MapPin, Shield
+  Calendar, Camera, Flag, Fuel, Gauge, Heart, Palette, Settings2, ShieldCheck, Star, Truck, Users, Activity, Zap, Ruler, Wallet, Check, PieChart, LineChart, Flame, RotateCcw, BarChart2, CheckCircle2, FileText, Lock, Key, Wrench, MapPin, Shield, Tag, HelpCircle
 } from "lucide-react";
 import { useListing, useToggleFavourite } from "../hooks/useListings";
 import { useCreateEnquiry } from "../hooks/useEnquiries";
@@ -10,6 +10,10 @@ import { useAuth } from "../lib/auth";
 import { EmptyState, ErrorNote, formatINR, formatKm, LoadingBlock, VerifiedPlate } from "../components/ui";
 import { Viewer360 } from "../components/luxura/Viewer360";
 import { BookingModal } from "../components/luxura/BookingModal";
+import { TestDriveModal } from "../components/TestDriveModal";
+import { OfferModal } from "../components/OfferModal";
+import { SupportModal } from "../components/SupportModal";
+import { InspectionReportSection } from "../components/InspectionReportSection";
 import { AuthModal } from "../components/AuthModal";
 import { SimilarListings } from "../components/SimilarListings";
 import { ApiError } from "../lib/api/client";
@@ -86,6 +90,9 @@ export function ListingDetailPage() {
   const [viewer360Open, setViewer360Open] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [testDriveOpen, setTestDriveOpen] = useState(false);
+  const [offerOpen, setOfferOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
 
   // EMI Calculator State
   const [emiTenure, setEmiTenure] = useState(60); // months
@@ -467,6 +474,9 @@ export function ListingDetailPage() {
               </div>
             )}
 
+            {/* 200-Point Inspection Report */}
+            <InspectionReportSection specs={specs} brand={listing.brand} model={listing.model} />
+
             {/* Premium Features */}
             {listing.features.length > 0 && (
               <div>
@@ -670,6 +680,31 @@ export function ListingDetailPage() {
                       <p className="text-[11px] text-stone-500 text-center flex items-center justify-center gap-1">
                         <Check className="w-3 h-3" /> Fully refundable. Reserve for 48 hours.
                       </p>
+
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!user) setAuthOpen(true);
+                            else setTestDriveOpen(true);
+                          }}
+                          className="w-full bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 font-bold py-2.5 px-3 rounded-xl transition-all flex justify-center items-center gap-1.5 text-xs uppercase tracking-wider"
+                        >
+                          <Calendar className="w-3.5 h-3.5 text-blue-700" />
+                          Test Drive
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!user) setAuthOpen(true);
+                            else setOfferOpen(true);
+                          }}
+                          className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 font-bold py-2.5 px-3 rounded-xl transition-all flex justify-center items-center gap-1.5 text-xs uppercase tracking-wider"
+                        >
+                          <Tag className="w-3.5 h-3.5 text-emerald-700" />
+                          Make Offer
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -702,6 +737,18 @@ export function ListingDetailPage() {
                       {createEnquiry.error instanceof ApiError ? createEnquiry.error.message : "Couldn't send your message."}
                     </p>
                   )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!user) setAuthOpen(true);
+                      else setSupportOpen(true);
+                    }}
+                    className="w-full mt-3 py-2 text-stone-500 hover:text-stone-800 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer border-t border-stone-100 pt-3"
+                  >
+                    <HelpCircle className="w-3.5 h-3.5 text-stone-400" />
+                    Need help? Open support ticket
+                  </button>
                 </div>
               )}
             </div>
@@ -837,6 +884,30 @@ export function ListingDetailPage() {
         onClose={() => setViewer360Open(false)}
         brand={listing.brand}
         model={listing.model}
+      />
+
+      <TestDriveModal
+        isOpen={testDriveOpen}
+        onClose={() => setTestDriveOpen(false)}
+        listingId={listing.id}
+        listingTitle={listing.title}
+        city={listing.city}
+      />
+
+      <OfferModal
+        isOpen={offerOpen}
+        onClose={() => setOfferOpen(false)}
+        listingId={listing.id}
+        listingTitle={listing.title}
+        listingPrice={Number(listing.price)}
+      />
+
+      <SupportModal
+        isOpen={supportOpen}
+        onClose={() => setSupportOpen(false)}
+        listingId={listing.id}
+        listingTitle={listing.title}
+        defaultCategory="vehicle"
       />
     </div>
   );

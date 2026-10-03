@@ -76,6 +76,7 @@ export interface VehicleListing {
   documents: VehicleDocument[];
   features: VehicleFeature[];
   is_favourited: boolean;
+  specifications?: Record<string, any>;
 }
 
 export interface ListingSearchResult {
@@ -248,4 +249,83 @@ export interface ListingCreateInput {
   state?: string;
   pincode?: string;
   features?: string[];
+}
+
+export type AppointmentStatus = "requested" | "confirmed" | "rescheduled" | "cancelled" | "completed" | "no_show";
+export type AppointmentType = "test_drive" | "inspection";
+
+export interface Appointment {
+  id: string;
+  listing_id: string;
+  listing_title: string;
+  listing_slug: string;
+  buyer_id: string;
+  buyer_name: string;
+  buyer_phone: string;
+  seller_id: string;
+  seller_name: string;
+  seller_phone: string;
+  appointment_type: AppointmentType;
+  scheduled_at: string;
+  time_slot: string | null;
+  status: AppointmentStatus;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type OfferStatus = "submitted" | "countered" | "accepted" | "rejected" | "expired";
+
+export interface VehicleOffer {
+  id: string;
+  listing_id: string;
+  listing_title: string;
+  listing_slug: string;
+  listing_price: string;
+  buyer_id: string;
+  buyer_name: string;
+  seller_id: string;
+  seller_name: string;
+  offer_amount: string;
+  counter_amount: string | null;
+  status: OfferStatus;
+  message: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SupportCategory = "general" | "vehicle" | "appointment" | "payment" | "report";
+export type SupportTicketStatus = "open" | "in_progress" | "resolved" | "closed";
+
+export interface SupportMessage {
+  id: string;
+  ticket_id: string;
+  sender_id: string;
+  sender_name: string;
+  sender_role: string;
+  content: string;
+  created_at: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  user_id: string;
+  user_name: string;
+  user_email: string | null;
+  subject: string;
+  category: SupportCategory;
+  listing_id: string | null;
+  listing_title: string | null;
+  appointment_id: string | null;
+  status: SupportTicketStatus;
+  created_at: string;
+  updated_at: string;
+  messages: SupportMessage[];
+}
+
+export interface SavedSearch {
+  id: string;
+  name: string;
+  filters: Record<string, any>;
+  created_at: string;
 }

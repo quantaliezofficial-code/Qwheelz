@@ -1,21 +1,27 @@
 import { useState } from "react";
 import {
-  AlertTriangle, BarChart3, CheckCircle2, ClipboardList, FileClock, Flag, ShieldCheck, Star, Users2, Wallet, XCircle,
+  AlertTriangle, BarChart3, CheckCircle2, ClipboardList, FileClock, Flag, ShieldCheck, Star, Users2, Wallet, XCircle, Calendar, HelpCircle, Send, MessageSquare, Clock, Check
 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   useAdminOverview, useAdminUsers, useAdminListings, useAdminVerifications, useAdminPayments,
   useAdminSubscriptions, useAdminReports, useAdminReviews, useAdminAuditLog, useAdminActions,
 } from "../hooks/useAdmin";
+import { appointmentsApi } from "../lib/api/appointments";
+import { supportApi } from "../lib/api/support";
+import type { Appointment, AppointmentStatus, SupportTicket, SupportTicketStatus } from "../types";
 import { EmptyState, formatINR, LoadingBlock, StatusBadge, VerifiedPlate } from "../components/ui";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line } from 'recharts';
 
-type Tab = "overview" | "approvals" | "listings" | "users" | "finance" | "reports" | "reviews" | "audit";
+type Tab = "overview" | "approvals" | "listings" | "users" | "appointments" | "support" | "finance" | "reports" | "reviews" | "audit";
 
-const TABS: { value: Tab; label: string; icon: typeof BarChart3 }[] = [
+const TABS: { value: Tab; label: string; icon: any }[] = [
   { value: "overview", label: "Overview", icon: BarChart3 },
   { value: "approvals", label: "Approval Queue", icon: ClipboardList },
   { value: "listings", label: "Vehicles", icon: ShieldCheck },
   { value: "users", label: "Users", icon: Users2 },
+  { value: "appointments", label: "Appointments", icon: Calendar },
+  { value: "support", label: "Support Tickets", icon: HelpCircle },
   { value: "finance", label: "Finance", icon: Wallet },
   { value: "reports", label: "Reports", icon: Flag },
   { value: "reviews", label: "Reviews", icon: Star },
@@ -48,6 +54,8 @@ export function AdminDashboard() {
           {tab === "approvals" && <ApprovalsTab />}
           {tab === "listings" && <ListingsTab />}
           {tab === "users" && <UsersTab />}
+          {tab === "appointments" && <AppointmentsTab />}
+          {tab === "support" && <SupportAdminTab />}
           {tab === "finance" && <FinanceTab />}
           {tab === "reports" && <ReportsTab />}
           {tab === "reviews" && <ReviewsTab />}
@@ -394,6 +402,334 @@ function AuditTab() {
           <span className="qz-mono text-xs text-slate">{new Date(entry.created_at).toLocaleString()}</span>
         </div>
       ))}
+    </div>
+  );
+}
+
+function AppointmentsTab() {
+  const [filter, setFilter] = useState<string>("all");
+  const queryClient = useQueryClient();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-appointments", filter],
+    queryFn: () =>
+      appointmentsApi.adminList({
+        status: filter === "all" ? undefined : (filter as AppointmentStatus),
+      }),
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: AppointmentStatus }) =>
+      appointmentsApi.updateStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-appointments"] });
+    },
+  });
+
+  if (isLoading) return <LoadingBlock />;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="font-display text-lg font-bold text-ink">Platform Appointments & Test Drives</h2>
+          <p className="text-xs text-slate">Monitor scheduled test drives and inspections across all sellers.</p>
+        </div>
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="qz-input rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-semibold"
+        >
+          <option value="all">All Statuses</option>
+          <option value="requested">Requested</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="rescheduled">Rescheduled</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      {!data || data.length === 0 ? (
+        <EmptyState title="No appointments match this filter" />
+      ) : (
+        <div className="overflow-x-auto rounded-2xl border border-stone-200 bg-white shadow-xs">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-stone-50 border-b border-stone-200 uppercase font-bold text-slate">
+              <tr>
+                <th className="p-3.5">Vehicle</th>
+                <th className="p-3.5">Type</th>
+                <th className="p-3.5">Buyer</th>
+                <th className="p-3.5">Seller</th>
+                <th className="p-3.5">Schedule</th>
+                <th className="p-3.5">Status</th>
+                <th className="p-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-stone-100">
+              {data.map((appt: Appointment) => (
+                <tr key={appt.id} className="hover:bg-stone-50/60">
+                  <td className="p-3.5 font-bold text-ink max-w-[180px] truncate">
+                    {appt.listing_title}
+                  </td>
+                  <td className="p-3.5 uppercase font-semibold text-slate">
+                    {appt.appointment_type === "test_drive" ? "Test Drive" : "Inspection"}
+                  </td>
+                  <td className="p-3.5 text-slate">
+                    <p className="font-semibold text-ink">{appt.buyer_name}</p>
+                    <p className="text-[10px]">{appt.buyer_phone}</p>
+                  </td>
+                  <td className="p-3.5 text-slate">
+                    <p className="font-semibold text-ink">{appt.seller_name}</p>
+                    <p className="text-[10px]">{appt.seller_phone}</p>
+                  </td>
+                  <td className="p-3.5 text-slate">
+                    <p className="font-medium text-ink">
+                      {new Date(appt.scheduled_at).toLocaleDateString("en-IN")}
+                    </p>
+                    <p className="text-[10px] text-blue-700">{appt.time_slot || "Flexible"}</p>
+                  </td>
+                  <td className="p-3.5">
+                    <span
+                      className={`px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
+                        appt.status === "confirmed"
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                          : appt.status === "requested"
+                          ? "bg-blue-50 text-blue-800 border-blue-200"
+                          : appt.status === "completed"
+                          ? "bg-stone-100 text-stone-700 border-stone-200"
+                          : "bg-amber-50 text-amber-800 border-amber-200"
+                      }`}
+                    >
+                      {appt.status}
+                    </span>
+                  </td>
+                  <td className="p-3.5 text-right space-x-1">
+                    {appt.status === "requested" && (
+                      <button
+                        onClick={() => updateStatusMutation.mutate({ id: appt.id, status: "confirmed" })}
+                        className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-bold uppercase"
+                      >
+                        Confirm
+                      </button>
+                    )}
+                    {appt.status === "confirmed" && (
+                      <button
+                        onClick={() => updateStatusMutation.mutate({ id: appt.id, status: "completed" })}
+                        className="px-2 py-1 bg-blue-900 hover:bg-blue-950 text-white rounded text-[10px] font-bold uppercase"
+                      >
+                        Complete
+                      </button>
+                    )}
+                    {appt.status !== "cancelled" && appt.status !== "completed" && (
+                      <button
+                        onClick={() => updateStatusMutation.mutate({ id: appt.id, status: "cancelled" })}
+                        className="px-2 py-1 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-[10px] font-bold uppercase"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SupportAdminTab() {
+  const [filter, setFilter] = useState<string>("all");
+  const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState("");
+  const queryClient = useQueryClient();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-support-tickets", filter],
+    queryFn: () =>
+      supportApi.listTickets({
+        status: filter === "all" ? undefined : (filter as SupportTicketStatus),
+      }),
+  });
+
+  const activeTicketQuery = useQuery({
+    queryKey: ["support-ticket", activeTicketId],
+    queryFn: () => supportApi.getTicket(activeTicketId!),
+    enabled: !!activeTicketId,
+  });
+
+  const sendReplyMutation = useMutation({
+    mutationFn: ({ id, content }: { id: string; content: string }) =>
+      supportApi.sendMessage(id, content),
+    onSuccess: () => {
+      setReplyContent("");
+      queryClient.invalidateQueries({ queryKey: ["support-ticket", activeTicketId] });
+      queryClient.invalidateQueries({ queryKey: ["admin-support-tickets"] });
+    },
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: SupportTicketStatus }) =>
+      supportApi.updateStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["support-ticket", activeTicketId] });
+      queryClient.invalidateQueries({ queryKey: ["admin-support-tickets"] });
+    },
+  });
+
+  if (isLoading) return <LoadingBlock />;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="font-display text-lg font-bold text-ink">Support & Concierge Operations</h2>
+          <p className="text-xs text-slate">Manage tickets submitted by buyers and sellers across the platform.</p>
+        </div>
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="qz-input rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-semibold"
+        >
+          <option value="all">All Tickets</option>
+          <option value="open">Open</option>
+          <option value="in_progress">In Progress</option>
+          <option value="resolved">Resolved</option>
+          <option value="closed">Closed</option>
+        </select>
+      </div>
+
+      {activeTicketId ? (
+        <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-xs space-y-5">
+          <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+            <div>
+              <button
+                onClick={() => setActiveTicketId(null)}
+                className="text-xs font-bold text-blue-700 hover:underline mb-1 cursor-pointer"
+              >
+                ← Back to Ticket List
+              </button>
+              <h3 className="text-lg font-bold text-ink">
+                {activeTicketQuery.data?.subject || "Support Ticket Thread"}
+              </h3>
+              <div className="flex items-center gap-2 mt-1 text-xs text-slate">
+                <span>User: {activeTicketQuery.data?.user_name} ({activeTicketQuery.data?.user_email || "No email"})</span>
+                <span>• Category: {activeTicketQuery.data?.category}</span>
+                {activeTicketQuery.data?.listing_title && (
+                  <span className="text-blue-700 font-medium">
+                    • Vehicle: {activeTicketQuery.data.listing_title}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => updateStatusMutation.mutate({ id: activeTicketId, status: "resolved" })}
+                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer"
+              >
+                Mark Resolved
+              </button>
+              <button
+                onClick={() => updateStatusMutation.mutate({ id: activeTicketId, status: "closed" })}
+                className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer"
+              >
+                Close Ticket
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-3 max-h-[350px] overflow-y-auto qz-scroll p-2">
+            {activeTicketQuery.isLoading ? (
+              <LoadingBlock />
+            ) : (
+              activeTicketQuery.data?.messages?.map((msg) => {
+                const isStaff = msg.sender_role === "admin";
+                return (
+                  <div
+                    key={msg.id}
+                    className={`flex flex-col ${isStaff ? "items-end" : "items-start"}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-2xl p-3.5 text-xs ${
+                        isStaff
+                          ? "bg-blue-900 text-white"
+                          : "bg-stone-100 text-stone-900"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-3 mb-1 text-[10px] opacity-75">
+                        <span className="font-bold">{msg.sender_name} {isStaff ? "(Admin/Concierge)" : "(User)"}</span>
+                        <span>{new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                      </div>
+                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <div className="pt-3 border-t border-stone-100 flex gap-2">
+            <textarea
+              rows={2}
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              placeholder="Type official reply to the user..."
+              className="flex-1 bg-stone-50 border border-stone-200 rounded-xl px-4 py-2 text-xs text-stone-900 focus:border-blue-600 focus:outline-none resize-none"
+            />
+            <button
+              onClick={() => sendReplyMutation.mutate({ id: activeTicketId, content: replyContent.trim() })}
+              disabled={!replyContent.trim() || sendReplyMutation.isPending}
+              className="px-5 bg-blue-900 hover:bg-blue-950 text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 disabled:opacity-50 transition-all cursor-pointer"
+            >
+              <Send size={14} /> Reply
+            </button>
+          </div>
+        </div>
+      ) : !data || data.length === 0 ? (
+        <EmptyState title="No support tickets match this filter" />
+      ) : (
+        <div className="grid grid-cols-1 gap-3">
+          {data.map((ticket: SupportTicket) => (
+            <div
+              key={ticket.id}
+              onClick={() => setActiveTicketId(ticket.id)}
+              className="bg-white border border-stone-200 hover:border-blue-500/40 rounded-2xl p-4 shadow-xs flex items-center justify-between cursor-pointer transition-all"
+            >
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span
+                    className={`px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
+                      ticket.status === "open"
+                        ? "bg-blue-50 text-blue-800 border-blue-200"
+                        : ticket.status === "resolved"
+                        ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                        : "bg-stone-100 text-stone-700 border-stone-200"
+                    }`}
+                  >
+                    {ticket.status}
+                  </span>
+                  <span className="text-[10px] uppercase font-bold text-slate bg-stone-100 px-2 py-0.5 rounded">
+                    {ticket.category}
+                  </span>
+                  <span className="text-xs text-slate">By {ticket.user_name}</span>
+                </div>
+                <h4 className="font-bold text-sm text-ink">{ticket.subject}</h4>
+                {ticket.listing_title && (
+                  <p className="text-xs text-blue-700 font-medium mt-0.5">
+                    Vehicle: {ticket.listing_title}
+                  </p>
+                )}
+              </div>
+              <div className="text-right text-xs text-slate">
+                <p>{new Date(ticket.updated_at).toLocaleDateString("en-IN")}</p>
+                <span className="text-blue-700 font-bold">Open thread →</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

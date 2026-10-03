@@ -1,14 +1,18 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Eye, MessageSquare, Plus, Rocket, Upload } from "lucide-react";
+import { Eye, MessageSquare, Plus, Rocket, Upload, Calendar, Tag, Check, CheckCircle2, X, Clock, AlertCircle } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMyListings, useMarkListingSold, useUploadListingImage, usePromoteListing } from "../hooks/useListings";
 import { useMyEnquiries } from "../hooks/useEnquiries";
 import { useMySubscription, usePlans, useSubscribe } from "../hooks/useSeller";
+import { appointmentsApi } from "../lib/api/appointments";
+import { offersApi } from "../lib/api/offers";
+import type { Appointment, AppointmentStatus, VehicleOffer, OfferStatus } from "../types";
 import { useAuth } from "../lib/auth";
 import { EmptyState, formatINR, LoadingBlock, StatusBadge } from "../components/ui";
 import { EnquiryThread } from "../components/EnquiryThread";
 
-type Tab = "listings" | "enquiries" | "subscription";
+type Tab = "listings" | "appointments" | "offers" | "enquiries" | "subscription";
 
 export function SellerDashboard() {
   const { user } = useAuth();
@@ -21,23 +25,25 @@ export function SellerDashboard() {
           <h1 className="font-display text-2xl font-bold text-ink">
             {user?.seller_type === "dealer" ? "Dealer Dashboard" : "Seller Dashboard"}
           </h1>
-          <p className="mt-1 text-sm text-slate">Manage your listings, enquiries, and account.</p>
+          <p className="mt-1 text-sm text-slate">Manage your vehicle listings, test drives, offers, and buyer enquiries.</p>
         </div>
         <Link to="/sell" className="qz-btn-primary flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold">
           <Plus size={16} /> Add vehicle
         </Link>
       </div>
 
-      <div className="mb-6 flex gap-1 border-b border-fog">
+      <div className="mb-6 flex gap-1 border-b border-fog overflow-x-auto qz-scroll">
         {([
           ["listings", "My Listings"],
-          ["enquiries", "Enquiries"],
+          ["appointments", "Test Drives & Appointments"],
+          ["offers", "Offers & Negotiations"],
+          ["enquiries", "Leads CRM"],
           ["subscription", "Subscription"],
         ] as [Tab, string][]).map(([value, label]) => (
           <button
             key={value}
             onClick={() => setTab(value)}
-            className={`border-b-2 px-4 py-2.5 text-sm font-semibold ${tab === value ? "border-blue-600 text-blue-700" : "border-transparent text-slate hover:text-ink"}`}
+            className={`border-b-2 px-4 py-2.5 text-sm font-semibold whitespace-nowrap cursor-pointer transition-colors ${tab === value ? "border-blue-600 text-blue-700 font-bold" : "border-transparent text-slate hover:text-ink"}`}
           >
             {label}
           </button>
@@ -45,6 +51,8 @@ export function SellerDashboard() {
       </div>
 
       {tab === "listings" && <ListingsTab />}
+      {tab === "appointments" && <AppointmentsSellerTab />}
+      {tab === "offers" && <OffersSellerTab />}
       {tab === "enquiries" && <EnquiriesTab />}
       {tab === "subscription" && <SubscriptionTab />}
     </div>
@@ -234,6 +242,348 @@ function SubscriptionTab() {
             {justSubscribed === plan.id && <p className="mt-2 text-xs text-signal-600">Payment initiated — our team will confirm it shortly.</p>}
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function AppointmentsSellerTab() {
+  const queryClient = useQueryClient();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["seller-appointments"],
+    queryFn: () => appointmentsApi.list(),
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status, notes }: { id: string; status: AppointmentStatus; notes?: string }) =>
+      appointmentsApi.updateStatus(id, status, notes),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["seller-appointments"] });
+    },
+  });
+
+  if (isLoading) return <LoadingBlock />;
+
+  if (!data || data.length === 0) {
+    return (
+      <EmptyState
+        title="No test drives or appointments yet"
+        body="When interested buyers book a test drive or inspection on your vehicles, their appointment requests will appear here."
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="font-display text-lg font-bold text-ink">Upcoming Buyer Appointments</h2>
+        <span className="text-xs text-slate">{data.length} appointment(s)</span>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        {data.map((appt: Appointment) => (
+          <div
+            key={appt.id}
+            className="bg-white border border-stone-200 rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+          >
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span
+                  className={`px-2.5 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
+                    appt.status === "confirmed"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      : appt.status === "requested"
+                      ? "bg-blue-50 text-blue-800 border-blue-200"
+                      : appt.status === "completed"
+                      ? "bg-stone-100 text-stone-700 border-stone-200"
+                      : "bg-amber-50 text-amber-800 border-amber-200"
+                  }`}
+                >
+                  {appt.status.replace("_", " ")}
+                </span>
+                <span className="text-[10px] uppercase font-bold text-slate bg-stone-100 px-2 py-0.5 rounded">
+                  {appt.appointment_type === "test_drive" ? "Test Drive" : "Inspection"}
+                </span>
+              </div>
+
+              <h3 className="font-bold text-base text-ink">
+                <Link to={`/cars/${appt.listing_slug}`} className="hover:text-blue-700">
+                  {appt.listing_title}
+                </Link>
+              </h3>
+
+              <div className="flex flex-wrap items-center gap-4 text-xs text-slate">
+                <span className="font-semibold text-ink">
+                  Buyer: {appt.buyer_name} ({appt.buyer_phone})
+                </span>
+                <span className="flex items-center gap-1">
+                  <Calendar size={13} className="text-blue-600" />
+                  {new Date(appt.scheduled_at).toLocaleDateString("en-IN", {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </span>
+                {appt.time_slot && (
+                  <span className="flex items-center gap-1">
+                    <Clock size={13} className="text-blue-600" />
+                    {appt.time_slot}
+                  </span>
+                )}
+              </div>
+
+              {appt.notes && (
+                <p className="text-xs text-slate bg-stone-50 p-2 rounded-lg border border-stone-100 italic">
+                  "{appt.notes}"
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 self-end sm:self-center">
+              {appt.status === "requested" && (
+                <>
+                  <button
+                    onClick={() => updateStatusMutation.mutate({ id: appt.id, status: "confirmed" })}
+                    disabled={updateStatusMutation.isPending}
+                    className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => updateStatusMutation.mutate({ id: appt.id, status: "cancelled" })}
+                    disabled={updateStatusMutation.isPending}
+                    className="px-3.5 py-2 border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    Decline
+                  </button>
+                </>
+              )}
+
+              {appt.status === "confirmed" && (
+                <>
+                  <button
+                    onClick={() => updateStatusMutation.mutate({ id: appt.id, status: "completed" })}
+                    disabled={updateStatusMutation.isPending}
+                    className="px-3.5 py-2 bg-blue-900 hover:bg-blue-950 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                  >
+                    Mark Done
+                  </button>
+                  <button
+                    onClick={() => updateStatusMutation.mutate({ id: appt.id, status: "cancelled" })}
+                    disabled={updateStatusMutation.isPending}
+                    className="px-3.5 py-2 border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function OffersSellerTab() {
+  const queryClient = useQueryClient();
+  const [counteringOfferId, setCounteringOfferId] = useState<string | null>(null);
+  const [counterAmount, setCounterAmount] = useState<number>(0);
+  const [counterMessage, setCounterMessage] = useState<string>("");
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["seller-offers"],
+    queryFn: () => offersApi.list(),
+  });
+
+  const acceptMutation = useMutation({
+    mutationFn: (id: string) => offersApi.accept(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["seller-offers"] });
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: (id: string) => offersApi.reject(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["seller-offers"] });
+    },
+  });
+
+  const counterMutation = useMutation({
+    mutationFn: ({ id, amount, msg }: { id: string; amount: number; msg?: string }) =>
+      offersApi.counter(id, amount, msg),
+    onSuccess: () => {
+      setCounteringOfferId(null);
+      queryClient.invalidateQueries({ queryKey: ["seller-offers"] });
+    },
+  });
+
+  if (isLoading) return <LoadingBlock />;
+
+  if (!data || data.length === 0) {
+    return (
+      <EmptyState
+        title="No price offers received yet"
+        body="When potential buyers make offers on your vehicles below the asking price, they will appear here for negotiation."
+      />
+    );
+  }
+
+  const handleStartCounter = (offer: VehicleOffer) => {
+    setCounteringOfferId(offer.id);
+    setCounterAmount(Math.round((Number(offer.listing_price) + Number(offer.offer_amount)) / 2));
+    setCounterMessage("");
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="font-display text-lg font-bold text-ink">Price Offers & Negotiations</h2>
+        <span className="text-xs text-slate">{data.length} offer(s)</span>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        {data.map((offer: VehicleOffer) => {
+          const discountPct = Math.round(
+            ((Number(offer.listing_price) - Number(offer.offer_amount)) / Number(offer.listing_price)) * 100
+          );
+
+          return (
+            <div
+              key={offer.id}
+              className="bg-white border border-stone-200 rounded-2xl p-5 shadow-xs space-y-4"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
+                        offer.status === "accepted"
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                          : offer.status === "submitted"
+                          ? "bg-blue-50 text-blue-800 border-blue-200"
+                          : offer.status === "countered"
+                          ? "bg-amber-50 text-amber-800 border-amber-200"
+                          : "bg-stone-100 text-stone-700 border-stone-200"
+                      }`}
+                    >
+                      {offer.status}
+                    </span>
+                    <span className="text-xs text-slate">
+                      Received {new Date(offer.created_at).toLocaleDateString("en-IN")}
+                    </span>
+                  </div>
+
+                  <h3 className="font-bold text-base text-ink">
+                    <Link to={`/cars/${offer.listing_slug}`} className="hover:text-blue-700">
+                      {offer.listing_title}
+                    </Link>
+                  </h3>
+
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate">
+                    <span>Buyer: <strong className="text-ink">{offer.buyer_name}</strong></span>
+                    <span>Asking Price: <strong>{formatINR(Number(offer.listing_price))}</strong></span>
+                    <span className="text-emerald-700 font-bold">
+                      Offered: {formatINR(Number(offer.offer_amount))} ({discountPct}% discount)
+                    </span>
+                    {offer.counter_amount && (
+                      <span className="text-amber-800 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                        Countered at: {formatINR(Number(offer.counter_amount))}
+                      </span>
+                    )}
+                  </div>
+
+                  {offer.message && (
+                    <p className="text-xs text-slate bg-stone-50 p-2 rounded-lg border border-stone-100 italic">
+                      "{offer.message}"
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 self-end sm:self-center">
+                  {offer.status === "submitted" && (
+                    <>
+                      <button
+                        onClick={() => acceptMutation.mutate(offer.id)}
+                        disabled={acceptMutation.isPending}
+                        className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleStartCounter(offer)}
+                        className="px-3.5 py-2 bg-blue-900 hover:bg-blue-950 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                      >
+                        Counter
+                      </button>
+                      <button
+                        onClick={() => rejectMutation.mutate(offer.id)}
+                        disabled={rejectMutation.isPending}
+                        className="px-3.5 py-2 border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        Decline
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Inline Counter Form */}
+              {counteringOfferId === offer.id && (
+                <div className="p-4 bg-stone-50 border border-stone-200 rounded-xl space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-ink">
+                    Make Counter Offer to {offer.buyer_name}
+                  </h4>
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
+                    <div className="relative flex-1 w-full">
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-slate">
+                        ₹
+                      </span>
+                      <input
+                        type="number"
+                        min={1}
+                        value={counterAmount}
+                        onChange={(e) => setCounterAmount(Number(e.target.value))}
+                        className="w-full bg-white border border-stone-200 rounded-lg pl-7 pr-3 py-2 text-sm font-bold text-ink focus:border-blue-600 focus:outline-none"
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Optional message to buyer"
+                      value={counterMessage}
+                      onChange={(e) => setCounterMessage(e.target.value)}
+                      className="w-full sm:w-1/2 bg-white border border-stone-200 rounded-lg px-3 py-2 text-xs text-ink focus:border-blue-600 focus:outline-none"
+                    />
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <button
+                        onClick={() =>
+                          counterMutation.mutate({
+                            id: offer.id,
+                            amount: counterAmount,
+                            msg: counterMessage.trim() || undefined,
+                          })
+                        }
+                        disabled={counterAmount <= 0 || counterMutation.isPending}
+                        className="flex-1 sm:flex-initial px-4 py-2 bg-blue-900 hover:bg-blue-950 text-white rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer"
+                      >
+                        Send Counter
+                      </button>
+                      <button
+                        onClick={() => setCounteringOfferId(null)}
+                        className="px-3 py-2 text-xs text-slate hover:text-ink cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
