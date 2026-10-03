@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: quantaliez-db
+    restart: always
+    environment:
+      POSTGRES_USER: quantaliez
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: quantaliez_auto
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quantaliez -d quantaliez_auto"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: quantaliez-api
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://quantaliez:devpassword@postgres:5432/quantaliez_auto
+      JWT_SECRET_KEY: change-me-to-a-long-random-string-in-production
+      ENVIRONMENT: dev
+      CORS_ALLOWED_ORIGINS: http://localhost,http://localhost:5173,http://localhost:80
+      APP_BASE_URL: http://localhost:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploads_data:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: quantaliez-web
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
+  uploads_data:

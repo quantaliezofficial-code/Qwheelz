@@ -1,0 +1,16 @@
+{
+  "name": "Luxura Motors",
+  "short_name": "Luxura",
+  "description": "Premium Automotive Marketplace",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAF9",
+  "theme_color": "#d97706",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}

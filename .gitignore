@@ -1,0 +1,82 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Production builds
+dist/
+build/
+out/
+
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+venv*/
+.venv/
+env/
+ENV/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+junit.xml
+
+# Local Database & Workstation files
+local_pgdata/
+luxura/
+luxura.zip
+scratch/
+pg.log
+*.log
+patch.js
+
+# Internal audit reports and workspace conversion notes
+*.docx
+*.pdf
+*.html
+GroundBooking*
+implementation_plan*.md
+final_deliverable.md
+final_status.md
+task.md
+MIGRATION_NOTES.md
+PROJECT_HEALTH_REPORT.md
+AUDIT_QUICK_STATUS.md
+backend/live_audit_test.py
+backend/drop_types.py
+backend/tech_models.py
+frontend/download_logos.py
+frontend/remove_bg.py
+frontend/remove_white.py
+frontend/test-errors.cjs
+frontend/venv-rembg/
+.github/
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Local upload storage
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Tool caches
+.originkit/

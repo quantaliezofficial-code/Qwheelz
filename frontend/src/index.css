@@ -1,0 +1,206 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:ital,wght@0,400..700;1,400..700&display=swap');
+@import "tailwindcss";
+
+@layer base {
+  * {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+}
+
+@layer utilities {
+  .bg-grid-pattern {
+    background-size: 40px 40px;
+    background-image: linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+  }
+}
+
+
+/* ==========================================================================
+   Quantaliez Auto — design tokens
+
+   A fresh identity for the vehicle marketplace, not a recolor of the old
+   GroundBooking theme (deep green / marigold / Fraunces serif). The brief
+   here is different: a tech-forward parent brand (Quantaliez), a subject
+   that's mechanical and instrument-driven (dashboards, gauges, plates),
+   and a trust problem to visually solve (verified sellers in a classifieds
+   market). That points somewhere specific rather than generic-SaaS-blue:
+
+   - Asphalt: a near-black with a cool, blue-grey undertone (not a warm
+     near-black) for dark surfaces — the hero, the header on dark mode.
+   - Ignition: a confident cobalt blue as the primary brand color — trust,
+     links, verified badges. Distinct from both GroundBooking's green and
+     the generic SaaS-indigo default.
+   - Ember: a warm orange-red accent, used sparingly for primary calls to
+     action (Contact Seller, Post Your Vehicle) — a nod to tail-light /
+     hazard-light color, giving the accent an automotive reason to exist
+     rather than being an arbitrary complementary hue.
+   - Signal: a distinct green reserved only for verified/success states,
+     so it never competes with Ignition for "primary" attention.
+
+   Typography: Space Grotesk (display) is geometric and a little
+   technical — it reads as instrument-panel/dashboard rather than
+   editorial, which is the point for a vehicle marketplace. Plus Jakarta
+   Sans (body) is humanist enough to stay warm and readable at length
+   despite Space Grotesk's edges. JetBrains Mono carries prices, odometer
+   readings, VINs and reference codes — numerals that benefit from
+   tabular alignment.
+
+   Signature element: a license-plate-style tag (see .qz-plate below),
+   used only for "Verified" badges and listing reference codes — a
+   restrained nod to Indian HSRP plates (white ground, thin border, a
+   small blue state-code tab) rather than decoration everywhere.
+   ========================================================================== */
+
+@theme {
+  --font-display: "Montserrat", "Plus Jakarta Sans", sans-serif;
+  --font-serif: "Montserrat", "Plus Jakarta Sans", sans-serif;
+  --font-luxury: "Montserrat", "Plus Jakarta Sans", sans-serif;
+  --font-sans: "Plus Jakarta Sans", "Montserrat", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Core neutrals */
+  --color-asphalt: #12151a;
+  --color-asphalt-2: #1b2028;
+  --color-ink: #171a1f;
+  --color-slate: #5b6472;
+  --color-mist: #9aa3b0;
+  --color-fog: #e4e7ec;
+  --color-paper: #f4f5f7;
+  --color-white: #ffffff;
+
+  /* Brand */
+  --color-ignition-50: #eef2ff;
+  --color-ignition-100: #dbe4ff;
+  --color-ignition-200: #b3c3ff;
+  --color-ignition-300: #7f9bff;
+  --color-ignition-400: #4d70f5;
+  --color-ignition-500: #2f52e0;
+  --color-ignition-600: #2140bd;
+  --color-ignition-700: #1c3496;
+  --color-ignition-800: #182c78;
+  --color-ignition-900: #141f4d;
+
+  --color-ember-50: #fff2ed;
+  --color-ember-100: #ffe1d4;
+  --color-ember-200: #ffbea3;
+  --color-ember-300: #ff9670;
+  --color-ember-400: #ff6f42;
+  --color-ember-500: #f2501e;
+  --color-ember-600: #d43c11;
+  --color-ember-700: #ac2f0d;
+  --color-ember-800: #85260f;
+  --color-ember-900: #5c1c0e;
+
+  --color-signal-50: #eafbf3;
+  --color-signal-100: #cdf3e0;
+  --color-signal-500: #189c66;
+  --color-signal-600: #127f53;
+  --color-signal-700: #0f6642;
+
+  --color-amber-signal: #d99516;
+
+  --shadow-card: 0 1px 2px rgba(18, 21, 26, 0.06), 0 8px 24px -12px rgba(18, 21, 26, 0.18);
+  --shadow-lifted: 0 12px 32px -8px rgba(18, 21, 26, 0.28);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background: var(--color-paper);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, .qz-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  .qz-mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* The signature element: a small plate-style tag, used only for
+     "Verified" badges and listing reference codes. White ground, thin
+     ink border, a compact blue tab on the left edge — evokes an Indian
+     number plate's state-code strip without literally reproducing one. */
+  .qz-plate {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    border: 1.5px solid var(--color-ink);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--color-white);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+  .qz-plate__tab {
+    background: var(--color-ignition-500);
+    color: var(--color-white);
+    padding: 0.3rem 0.4rem;
+  }
+  .qz-plate__text {
+    padding: 0.3rem 0.5rem;
+    color: var(--color-ink);
+  }
+
+  .qz-btn-primary {
+    background: var(--color-ember-500);
+    color: var(--color-white);
+    transition: background-color 150ms ease, transform 150ms ease;
+  }
+  .qz-btn-primary:hover {
+    background: var(--color-ember-600);
+  }
+  .qz-btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .qz-btn-secondary {
+    background: var(--color-ignition-500);
+    color: var(--color-white);
+    transition: background-color 150ms ease, transform 150ms ease;
+  }
+  .qz-btn-secondary:hover {
+    background: var(--color-ignition-600);
+  }
+  .qz-btn-secondary:active {
+    transform: scale(0.98);
+  }
+
+  .qz-card {
+    background: var(--color-white);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-card);
+  }
+
+  .qz-input {
+    background: var(--color-white);
+    border: 1.5px solid var(--color-fog);
+    border-radius: 0.6rem;
+    transition: border-color 120ms ease;
+  }
+  .qz-input:focus {
+    outline: none;
+    border-color: var(--color-ignition-400);
+    box-shadow: 0 0 0 3px var(--color-ignition-100);
+  }
+
+  /* Scrollbar restraint for filter drawers / chat panes */
+  .qz-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+  .qz-scroll::-webkit-scrollbar-thumb { background: var(--color-fog); border-radius: 999px; }
+}
+@custom-variant dark (&:is(.dark *));
