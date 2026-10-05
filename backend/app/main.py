@@ -896,6 +896,8 @@ class AppointmentCreate(BaseModel):
     scheduled_at: datetime
     time_slot: str | None = None
     notes: str | None = None
+    name: str | None = None
+    phone: str | None = None
 
 class AppointmentStatusUpdate(BaseModel):
     status: str  # confirmed | rescheduled | cancelled | completed | no_show
@@ -926,38 +928,63 @@ class AppointmentOut(BaseModel):
 @app.post("/api/v1/appointments", response_model=AppointmentOut, status_code=201)
 async def create_appointment(
     payload: AppointmentCreate,
-    current: CurrentUser = Depends(get_current_user),
+    current: CurrentUser | None = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
 ):
-    from app.models.core import Appointment, VehicleListing
+    from app.models.core import Appointment, VehicleListing, User
     listing = await db.get(VehicleListing, payload.listing_id)
     if not listing:
         raise HTTPException(status_code=404, detail="Vehicle listing not found")
-    if listing.seller_id == current.id:
+    if current and listing.seller_id == current.id:
         raise HTTPException(status_code=400, detail="Cannot book appointment on your own listing")
     
+    if current:
+        buyer = await db.get(User, current.id)
+        buyer_id = current.id
+        buyer_name = buyer.name if buyer else "Buyer"
+        buyer_phone = buyer.phone if buyer else ""
+    else:
+        phone_clean = payload.phone.strip() if payload.phone else f"+9198{uuid.uuid4().int % 100000000:08d}"
+        stmt = select(User).where(User.phone == phone_clean)
+        res = await db.execute(stmt)
+        buyer = res.scalars().first()
+        if not buyer:
+            buyer = User(
+                phone=phone_clean,
+                name=payload.name or "Guest Buyer",
+                email=f"guest_{uuid.uuid4().hex[:6]}@quantaliez.com",
+                role="buyer",
+                password_hash="guest_unauthenticated_lead",
+            )
+            db.add(buyer)
+            await db.flush()
+        buyer_id = buyer.id
+        buyer_name = payload.name or buyer.name
+        buyer_phone = phone_clean
+
     seller = await db.get(User, listing.seller_id)
-    buyer = await db.get(User, current.id)
+
+    notes_text = payload.notes or ""
+    if not current and (payload.name or payload.phone):
+        notes_text = f"Contact: {buyer_name} ({buyer_phone}). {notes_text}".strip()
 
     appt = Appointment(
         listing_id=listing.id,
-        buyer_id=current.id,
+        buyer_id=buyer_id,
         seller_id=listing.seller_id,
         appointment_type=payload.appointment_type,
         scheduled_at=payload.scheduled_at,
         time_slot=payload.time_slot,
         status="requested",
-        notes=payload.notes,
+        notes=notes_text,
     )
     db.add(appt)
     await db.commit()
     await db.refresh(appt)
 
-    buyer_name = buyer.name if buyer else "Buyer"
-    buyer_phone = buyer.phone if buyer else ""
     await notifications_service.create_notification(
         db, listing.seller_id, "appointment_requested",
-        f"New {payload.appointment_type.replace('_', ' ')} requested for '{listing.title}' by {buyer_name}",
+        f"New {payload.appointment_type.replace('_', ' ')} requested for '{listing.title}' by {buyer_name} ({buyer_phone})",
         entity_type="appointment", entity_id=appt.id
     )
 
