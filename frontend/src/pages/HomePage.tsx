@@ -8,7 +8,7 @@ import {
   MessageCircle, 
   ArrowRight
 } from 'lucide-react';
-import { StaticHeroSection } from '../components/StaticHeroSection';
+import { StaticHeroSection, HeroAssuranceStrip } from '../components/StaticHeroSection';
 import { CoverflowShowcase } from '../components/CoverflowShowcase';
 import { FlowingMenu } from '../components/FlowingMenu';
 
@@ -115,10 +115,13 @@ export function HomePage() {
   return (
     <div className="bg-[#FAFAF9] text-stone-900 overflow-hidden font-sans min-h-screen selection:bg-blue-100 selection:text-blue-900">
       
-      {/* 1. STATIC HERO SECTION WITH INDIAN TOYOTA SHOWCASE */}
+      {/* 1. STATIC HERO SECTION WITH CINEMATIC AUTOMOTIVE VIDEO BACKGROUND */}
       <StaticHeroSection />
 
-      {/* 2. INTERACTIVE 3D COVERFLOW SHOWCASE (Scrolling left-to-right & right-to-left) */}
+      {/* 2. CORE ASSURANCE DETAILS (Positioned comfortably below the video margin & border) */}
+      <HeroAssuranceStrip />
+
+      {/* 3. INTERACTIVE 3D COVERFLOW SHOWCASE */}
       <CoverflowShowcase />
 
       {/* RECENTLY VIEWED CARS */}
