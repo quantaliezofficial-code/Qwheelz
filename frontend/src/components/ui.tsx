@@ -16,7 +16,7 @@ export function formatKm(km: number): string {
 
 export function VerifiedPlate({ label = "VERIFIED" }: { label?: string }) {
   return (
-    <span className="qz-plate" title="Identity and documents verified by Luxura Motors">
+    <span className="qz-plate" title="Identity and documents verified by Qwheelz">
       <span className="qz-plate__tab">
         <ShieldCheck size={11} strokeWidth={2.5} />
       </span>
@@ -28,23 +28,23 @@ export function VerifiedPlate({ label = "VERIFIED" }: { label?: string }) {
 const STATUS_STYLES: Record<string, string> = {
   draft: "bg-fog text-slate",
   pending_review: "bg-blue-100 text-blue-800",
-  active: "bg-signal-100 text-signal-700",
+  active: "bg-blue-50 text-blue-700 border border-blue-200",
   sold: "bg-ignition-100 text-ignition-700",
-  suspended: "bg-ember-100 text-ember-700",
+  suspended: "bg-slate-100 text-slate-700",
   new: "bg-ignition-100 text-ignition-700",
-  seller_responded: "bg-signal-100 text-signal-700",
+  seller_responded: "bg-blue-50 text-blue-700 border border-blue-200",
   closed: "bg-fog text-slate",
   pending: "bg-blue-100 text-blue-800",
-  approved: "bg-signal-100 text-signal-700",
-  rejected: "bg-ember-100 text-ember-700",
+  approved: "bg-blue-50 text-blue-700 border border-blue-200",
+  rejected: "bg-slate-100 text-slate-700",
   open: "bg-blue-100 text-blue-800",
-  resolved: "bg-signal-100 text-signal-700",
+  resolved: "bg-blue-50 text-blue-700 border border-blue-200",
   dismissed: "bg-fog text-slate",
   initiated: "bg-blue-100 text-blue-800",
-  success: "bg-signal-100 text-signal-700",
-  failed: "bg-ember-100 text-ember-700",
+  success: "bg-blue-50 text-blue-700 border border-blue-200",
+  failed: "bg-slate-100 text-slate-700",
   refunded: "bg-fog text-slate",
-  active_sub: "bg-signal-100 text-signal-700",
+  active_sub: "bg-blue-50 text-blue-700 border border-blue-200",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -63,7 +63,7 @@ export function StatusBadge({ status }: { status: string }) {
 }
 
 export function Spinner({ size = 20 }: { size?: number }) {
-  return <Loader2 size={size} className="animate-spin text-ignition-500" />;
+  return <Loader2 size={size} className="animate-spin text-blue-600" />;
 }
 
 export function LoadingBlock({ label = "Loading…" }: { label?: string }) {
@@ -88,7 +88,7 @@ export function EmptyState({ icon, title, body, action }: { icon?: ReactNode; ti
 
 export function ErrorNote({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-ember-200 bg-ember-50 px-4 py-3 text-sm text-ember-700 break-words whitespace-pre-wrap">{message}</div>
+    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 break-words whitespace-pre-wrap">{message}</div>
   );
 }
 

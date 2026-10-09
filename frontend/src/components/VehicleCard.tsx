@@ -116,7 +116,7 @@ export function VehicleCard({ listing }: { listing: VehicleListing }) {
 
           {/* Inspection badge on image bottom */}
           <div className="absolute bottom-3 left-3.5 z-10">
-            <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-400 bg-stone-950/75 backdrop-blur-md px-2 py-0.5 rounded border border-emerald-500/30">
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-blue-300 bg-stone-950/75 backdrop-blur-md px-2 py-0.5 rounded border border-blue-400/40">
               <ShieldCheck size={12} />
               200-Pt Checked
             </span>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ArrowLeftRight, Car, Bike, Zap, Layers } from "lucide-react";
+import { ArrowRight, Car, Bike, Zap, Layers } from "lucide-react";
 import CoverflowCarousel, { FLEET_SHOWCASE_ITEMS, CoverflowVehicle } from "./CoverflowCarousel";
 
 type CategoryFilter = "All" | "Cars" | "Bikes" | "Electric";
@@ -32,7 +32,7 @@ export function CoverflowShowcase() {
           Explore Certified Vehicles in Coverflow
         </h2>
         <p className="mt-2 text-sm sm:text-base text-slate-500 max-w-xl">
-          Scroll left to right and right to left to browse verified cars, bikes, and scooties in landscape 3D motion.
+          Browse verified cars, bikes, and scooties in landscape 3D motion.
         </p>
 
         {/* Quick Category Switcher */}
@@ -88,16 +88,6 @@ export function CoverflowShowcase() {
             <Zap size={14} />
             <span>Electric Cars</span>
           </button>
-        </div>
-
-        {/* Interaction hints */}
-        <div className="mt-4 flex items-center gap-3 text-xs font-medium text-slate-400">
-          <span className="flex items-center gap-1.5">
-            <ArrowLeftRight size={14} className="text-blue-600" />
-            Scroll left to right & right to left
-          </span>
-          <span className="text-slate-300">•</span>
-          <span>Click cards or side arrows to navigate</span>
         </div>
       </div>
 

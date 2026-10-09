@@ -137,7 +137,7 @@ export function AccountPage() {
       case "confirmed":
       case "accepted":
       case "resolved":
-        return "bg-emerald-50 text-emerald-800 border-emerald-200";
+        return "bg-blue-50 text-blue-800 border-blue-200";
       case "requested":
       case "submitted":
       case "open":
@@ -145,7 +145,7 @@ export function AccountPage() {
       case "in_progress":
       case "countered":
       case "rescheduled":
-        return "bg-amber-50 text-amber-800 border-amber-200";
+        return "bg-slate-100 text-slate-800 border-slate-200";
       case "cancelled":
       case "rejected":
       case "closed":
@@ -181,7 +181,7 @@ export function AccountPage() {
                   {user.role}
                 </span>
                 {user.is_verified && (
-                  <span className="flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                  <span className="flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 text-[11px] font-medium text-blue-700">
                     <CheckCircle2 size={12} /> Verified
                   </span>
                 )}
@@ -359,11 +359,11 @@ export function AccountPage() {
                     to="/sell"
                     className="group flex items-start gap-4 rounded-2xl border border-stone-200 bg-white p-5 shadow-xs transition-all hover:border-blue-500/40 hover:shadow-md"
                   >
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 transition-colors group-hover:bg-emerald-600 group-hover:text-white">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 transition-colors group-hover:bg-blue-900 group-hover:text-white">
                       <Car size={22} />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-stone-900 group-hover:text-emerald-700 transition-colors">
+                      <h3 className="text-base font-bold text-stone-900 group-hover:text-blue-700 transition-colors">
                         Sell a Vehicle
                       </h3>
                       <p className="mt-1 text-xs text-stone-500">
@@ -528,7 +528,7 @@ export function AccountPage() {
               action={
                 <Link
                   to="/cars"
-                  className="mt-3 px-5 py-2.5 bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md inline-block"
+                  className="mt-3 px-5 py-2.5 bg-blue-900 hover:bg-blue-950 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md inline-block"
                 >
                   Explore Collection
                 </Link>
@@ -566,12 +566,12 @@ export function AccountPage() {
                         Asking Price: <span className="font-semibold text-stone-800">{formatINR(Number(offer.listing_price))}</span>
                       </span>
                       <span className="text-stone-500">
-                        Your Offer: <span className="font-bold text-emerald-700">{formatINR(Number(offer.offer_amount))}</span>
+                        Your Offer: <span className="font-bold text-blue-700">{formatINR(Number(offer.offer_amount))}</span>
                       </span>
                       {offer.counter_amount && (
-                        <span className="text-stone-500 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                        <span className="text-stone-500 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
                           Seller Counter Offer:{" "}
-                          <span className="font-bold text-amber-900">{formatINR(Number(offer.counter_amount))}</span>
+                          <span className="font-bold text-blue-900">{formatINR(Number(offer.counter_amount))}</span>
                         </span>
                       )}
                     </div>
@@ -596,7 +596,7 @@ export function AccountPage() {
                         <button
                           onClick={() => acceptOfferMutation.mutate(offer.id)}
                           disabled={acceptOfferMutation.isPending}
-                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
+                          className="px-3 py-1.5 bg-blue-900 hover:bg-blue-950 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
                         >
                           Accept Counter
                         </button>

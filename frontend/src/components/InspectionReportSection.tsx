@@ -98,8 +98,8 @@ export function InspectionReportSection({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-stone-200">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
               Verified 200-Point Inspection
             </span>
             <span className="text-xs text-stone-500 font-medium">Engineer Certified</span>
@@ -133,18 +133,18 @@ export function InspectionReportSection({
 
       {/* Core Integrity Assurance Badges */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 my-6">
-        <div className="p-3 bg-emerald-50/70 border border-emerald-100 rounded-xl flex items-center gap-2.5">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+        <div className="p-3 bg-blue-50/70 border border-blue-100 rounded-xl flex items-center gap-2.5">
+          <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
           <div>
-            <p className="text-xs font-bold text-emerald-900 leading-tight">Zero Frame Damage</p>
-            <p className="text-[10px] text-emerald-700">Pillar & chassis verified</p>
+            <p className="text-xs font-bold text-blue-900 leading-tight">Zero Frame Damage</p>
+            <p className="text-[10px] text-blue-700">Pillar & chassis verified</p>
           </div>
         </div>
-        <div className="p-3 bg-emerald-50/70 border border-emerald-100 rounded-xl flex items-center gap-2.5">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+        <div className="p-3 bg-blue-50/70 border border-blue-100 rounded-xl flex items-center gap-2.5">
+          <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
           <div>
-            <p className="text-xs font-bold text-emerald-900 leading-tight">Non-Flooded Certified</p>
-            <p className="text-[10px] text-emerald-700">No water line or rust</p>
+            <p className="text-xs font-bold text-blue-900 leading-tight">Non-Flooded Certified</p>
+            <p className="text-[10px] text-blue-700">No water line or rust</p>
           </div>
         </div>
         <div className="p-3 bg-blue-50/70 border border-blue-100 rounded-xl flex items-center gap-2.5">
@@ -195,7 +195,7 @@ export function InspectionReportSection({
             className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-stone-50 hover:bg-stone-100/70 rounded-xl border border-stone-200/60 transition-colors gap-2"
           >
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 p-1 rounded-full bg-emerald-100 text-emerald-700 shrink-0">
+              <div className="mt-0.5 p-1 rounded-full bg-blue-100 text-blue-700 shrink-0">
                 <Check className="w-3.5 h-3.5" />
               </div>
               <div>
@@ -203,7 +203,7 @@ export function InspectionReportSection({
                 <p className="text-xs text-stone-600 mt-0.5">{item.detail}</p>
               </div>
             </div>
-            <span className="self-start sm:self-center px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-white text-emerald-800 border border-emerald-200 shrink-0">
+            <span className="self-start sm:self-center px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-white text-blue-800 border border-blue-200 shrink-0">
               Passed OEM Spec
             </span>
           </div>
@@ -245,13 +245,13 @@ export function InspectionReportSection({
                       className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-stone-50 rounded-xl border border-stone-200/50 gap-2"
                     >
                       <div className="flex items-start gap-2.5">
-                        <Check className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                        <Check className="w-3.5 h-3.5 text-blue-600 mt-0.5 shrink-0" />
                         <div>
                           <p className="text-xs font-bold text-stone-900">{item.name}</p>
                           <p className="text-xs text-stone-500">{item.detail}</p>
                         </div>
                       </div>
-                      <span className="self-start sm:self-center px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                      <span className="self-start sm:self-center px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded bg-blue-50 text-blue-800 border border-blue-200 shrink-0">
                         Passed
                       </span>
                     </div>

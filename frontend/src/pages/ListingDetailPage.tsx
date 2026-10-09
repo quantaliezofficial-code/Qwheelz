@@ -114,16 +114,16 @@ export function ListingDetailPage() {
   useEffect(() => {
     if (listing) {
       addViewed(listing);
-      document.title = `${listing.year} ${listing.brand} ${listing.model} | Luxura Motors`;
+      document.title = `${listing.year} ${listing.brand} ${listing.model} | Qwheelz`;
       
       const metaDescription = document.querySelector('meta[name="description"]');
       if (metaDescription) {
-        metaDescription.setAttribute("content", `Buy ${listing.year} ${listing.title} in ${listing.city} for ${formatINR(listing.price)}. Certified by Luxura Motors.`);
+        metaDescription.setAttribute("content", `Buy ${listing.year} ${listing.title} in ${listing.city} for ${formatINR(listing.price)}. Certified by Qwheelz.`);
       }
     }
     // Cleanup title on unmount
     return () => {
-      document.title = "Luxura Motors | India's Premium Auto Marketplace";
+      document.title = "Qwheelz | India's Certified Pre-Owned Auto Marketplace";
     };
   }, [listing, addViewed]);
 
@@ -217,9 +217,9 @@ export function ListingDetailPage() {
                 {/* Trust Badges */}
                 <div className="flex flex-wrap items-center gap-2">
                   {listing.is_featured && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-wide rounded-md border border-emerald-200">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wide rounded-md border border-blue-200">
                       <Check className="w-3.5 h-3.5" />
-                      Luxura Certified
+                      Qwheelz Certified
                     </span>
                   )}
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wide rounded-md border border-blue-200">
@@ -366,7 +366,7 @@ export function ListingDetailPage() {
                   {specs.insurance_status && (
                     <div className="flex items-start gap-3 p-3.5 bg-stone-50 rounded-xl border border-stone-200/70">
                       <div className="p-2 bg-white rounded-lg border border-stone-200 text-stone-700">
-                        <Shield className="w-4 h-4 text-emerald-600" />
+                        <Shield className="w-4 h-4 text-blue-600" />
                       </div>
                       <div>
                         <p className="text-xs text-stone-500 font-medium">Insurance Status</p>
@@ -412,7 +412,7 @@ export function ListingDetailPage() {
                   {specs.accident_history && (
                     <div className="flex items-start gap-3 p-3.5 bg-stone-50 rounded-xl border border-stone-200/70">
                       <div className="p-2 bg-white rounded-lg border border-stone-200 text-stone-700">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        <CheckCircle2 className="w-4 h-4 text-blue-600" />
                       </div>
                       <div>
                         <p className="text-xs text-stone-500 font-medium">Accident / Damage History</p>
@@ -497,7 +497,7 @@ export function ListingDetailPage() {
               <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900 mb-4 border-b border-stone-200 pb-2">Key Highlights</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-start gap-3">
-                  <div className="bg-emerald-50 text-emerald-600 p-2 rounded-lg">
+                  <div className="bg-blue-50 text-blue-600 p-2 rounded-lg">
                     <ShieldCheck size={20} />
                   </div>
                   <div>
@@ -521,9 +521,9 @@ export function ListingDetailPage() {
             <div className="mt-8">
               <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900 mb-4 border-b border-stone-200 pb-2">Pros & Considerations</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-xl">
-                  <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 mb-3 flex items-center gap-1.5"><CheckCircle2 size={14}/> Pros</p>
-                  <ul className="text-sm text-emerald-900 space-y-2 list-disc pl-4">
+                <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-xl">
+                  <p className="text-xs font-bold uppercase tracking-wider text-blue-800 mb-3 flex items-center gap-1.5"><CheckCircle2 size={14}/> Pros</p>
+                  <ul className="text-sm text-blue-900 space-y-2 list-disc pl-4">
                     <li>Excellent fuel economy for city driving</li>
                     <li>Highly reliable {listing.brand} engine</li>
                     <li>Low maintenance costs</li>
@@ -657,15 +657,15 @@ export function ListingDetailPage() {
                   Manage this listing
                 </Link>
               ) : sent ? (
-                <p className="mt-6 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-800 font-medium">Request sent! A Concierge will contact you shortly.</p>
+                <p className="mt-6 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800 font-medium">Request sent! A Concierge will contact you shortly.</p>
               ) : (
                 <div className="mt-6">
                   {bookingSuccess ? (
-                    <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex gap-3">
-                      <Check className="w-5 h-5 text-emerald-600 shrink-0" />
+                    <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
+                      <Check className="w-5 h-5 text-blue-600 shrink-0" />
                       <div>
-                        <p className="text-sm font-bold text-emerald-900">Vehicle Reserved</p>
-                        <p className="text-xs text-emerald-700 mt-1">You have successfully blocked this vehicle. Our team will contact you to finalize the transaction.</p>
+                        <p className="text-sm font-bold text-blue-900">Vehicle Reserved</p>
+                        <p className="text-xs text-blue-700 mt-1">You have successfully blocked this vehicle. Our team will contact you to finalize the transaction.</p>
                       </div>
                     </div>
                   ) : (
@@ -699,9 +699,9 @@ export function ListingDetailPage() {
                             if (!user) setAuthOpen(true);
                             else setOfferOpen(true);
                           }}
-                          className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 font-bold py-2.5 px-3 rounded-xl transition-all flex justify-center items-center gap-1.5 text-xs uppercase tracking-wider"
+                          className="w-full bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 font-bold py-2.5 px-3 rounded-xl transition-all flex justify-center items-center gap-1.5 text-xs uppercase tracking-wider"
                         >
-                          <Tag className="w-3.5 h-3.5 text-emerald-700" />
+                          <Tag className="w-3.5 h-3.5 text-blue-700" />
                           Make Offer
                         </button>
                       </div>
@@ -799,7 +799,7 @@ export function ListingDetailPage() {
               <div className="bg-white border border-stone-200 rounded-xl p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <PieChart className="w-4 h-4 text-emerald-600" />
+                    <PieChart className="w-4 h-4 text-blue-600" />
                     <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Est. Running Cost</h3>
                   </div>
                 </div>
@@ -818,8 +818,8 @@ export function ListingDetailPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-orange-50 flex items-center justify-center">
-                        {listing.fuel_type === "electric" ? <Zap size={12} className="text-orange-500" /> : <Flame size={12} className="text-orange-500" />}
+                      <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center">
+                        {listing.fuel_type === "electric" ? <Zap size={12} className="text-blue-600" /> : <Flame size={12} className="text-blue-600" />}
                       </div>
                       <div>
                         <p className="text-xs font-bold text-stone-800">Fuel & Energy</p>

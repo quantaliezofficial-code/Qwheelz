@@ -145,7 +145,7 @@ export function WizardPage() {
 
             {step === 4 && (
               <div className="animate-in slide-in-from-right-8 duration-500 flex-1 flex flex-col items-center justify-center text-center">
-                <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6">
+                <div className="w-24 h-24 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center mb-6">
                   <Sparkles size={48} />
                 </div>
                 <h2 className="text-3xl font-black text-stone-900 mb-4">You're all set!</h2>

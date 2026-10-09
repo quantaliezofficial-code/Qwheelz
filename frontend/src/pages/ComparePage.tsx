@@ -82,7 +82,7 @@ export function ComparePage() {
   ];
 
   const getDiffClass = (values: any[]) => {
-    return highlightDifferences && valuesDiffer(values) ? "bg-amber-50/70" : "";
+    return highlightDifferences && valuesDiffer(values) ? "bg-blue-50/70" : "";
   };
 
   return (
@@ -105,11 +105,11 @@ export function ComparePage() {
               onClick={() => setHighlightDifferences(!highlightDifferences)}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all cursor-pointer ${
                 highlightDifferences
-                  ? "bg-amber-100 border-amber-300 text-amber-900 shadow-xs"
+                  ? "bg-blue-100 border-blue-300 text-blue-900 shadow-xs"
                   : "bg-white border-stone-200 text-stone-600 hover:bg-stone-50"
               }`}
             >
-              <Sparkles size={14} className={highlightDifferences ? "text-amber-600" : "text-stone-400"} />
+              <Sparkles size={14} className={highlightDifferences ? "text-blue-600" : "text-stone-400"} />
               Highlight Differences {highlightDifferences && "ON"}
             </button>
             <button
@@ -361,8 +361,8 @@ export function ComparePage() {
                 </td>
                 {compareList.map((c) => (
                   <td key={c.id} className="p-4 border-b border-r border-stone-200">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200 text-xs font-semibold">
+                      <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
                       200-Point Inspected
                     </span>
                   </td>

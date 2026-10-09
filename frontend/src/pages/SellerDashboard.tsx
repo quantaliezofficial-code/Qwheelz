@@ -112,7 +112,7 @@ function ListingsTab() {
                     <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => e.target.files?.length && handleUpload(listing.id, e.target.files)} />
                   </label>
                   {listing.status === "active" && !listing.is_featured && (
-                    <button onClick={() => promote.mutate(listing.id)} className="rounded-lg border border-ember-200 px-2.5 py-1.5 text-xs font-semibold text-ember-600 hover:bg-ember-50">
+                    <button onClick={() => promote.mutate(listing.id)} className="rounded-lg border border-blue-200 px-2.5 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-50">
                       <Rocket size={12} className="mr-1 inline" /> Feature
                     </button>
                   )}
@@ -292,12 +292,12 @@ function AppointmentsSellerTab() {
                 <span
                   className={`px-2.5 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
                     appt.status === "confirmed"
-                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      ? "bg-blue-50 text-blue-800 border-blue-200"
                       : appt.status === "requested"
                       ? "bg-blue-50 text-blue-800 border-blue-200"
                       : appt.status === "completed"
                       ? "bg-stone-100 text-stone-700 border-stone-200"
-                      : "bg-amber-50 text-amber-800 border-amber-200"
+                      : "bg-slate-100 text-slate-800 border-slate-200"
                   }`}
                 >
                   {appt.status.replace("_", " ")}
@@ -347,7 +347,7 @@ function AppointmentsSellerTab() {
                   <button
                     onClick={() => updateStatusMutation.mutate({ id: appt.id, status: "confirmed" })}
                     disabled={updateStatusMutation.isPending}
-                    className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                    className="px-3.5 py-2 bg-blue-900 hover:bg-blue-950 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
                   >
                     Confirm
                   </button>
@@ -462,11 +462,11 @@ function OffersSellerTab() {
                     <span
                       className={`px-2.5 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
                         offer.status === "accepted"
-                          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                          ? "bg-blue-50 text-blue-800 border-blue-200"
                           : offer.status === "submitted"
                           ? "bg-blue-50 text-blue-800 border-blue-200"
                           : offer.status === "countered"
-                          ? "bg-amber-50 text-amber-800 border-amber-200"
+                          ? "bg-slate-100 text-slate-800 border-slate-200"
                           : "bg-stone-100 text-stone-700 border-stone-200"
                       }`}
                     >
@@ -486,11 +486,11 @@ function OffersSellerTab() {
                   <div className="flex flex-wrap items-center gap-4 text-xs text-slate">
                     <span>Buyer: <strong className="text-ink">{offer.buyer_name}</strong></span>
                     <span>Asking Price: <strong>{formatINR(Number(offer.listing_price))}</strong></span>
-                    <span className="text-emerald-700 font-bold">
+                    <span className="text-blue-700 font-bold">
                       Offered: {formatINR(Number(offer.offer_amount))} ({discountPct}% discount)
                     </span>
                     {offer.counter_amount && (
-                      <span className="text-amber-800 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                      <span className="text-blue-800 font-semibold bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
                         Countered at: {formatINR(Number(offer.counter_amount))}
                       </span>
                     )}
@@ -509,7 +509,7 @@ function OffersSellerTab() {
                       <button
                         onClick={() => acceptMutation.mutate(offer.id)}
                         disabled={acceptMutation.isPending}
-                        className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                        className="px-3.5 py-2 bg-blue-900 hover:bg-blue-950 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
                       >
                         Accept
                       </button>

@@ -5,8 +5,8 @@ export function TermsOfService() {
       <p className="mt-2 text-sm text-slate">Last updated: {new Date().toLocaleDateString()}</p>
 
       <div className="mt-8 flex flex-col gap-5 text-sm leading-relaxed text-slate">
-        <Section title="What Luxura Motors is">
-          Luxura Motors is a certified pre-owned vehicle marketplace that connects buyers with individual sellers and
+        <Section title="What Qwheelz is">
+          Qwheelz is a certified pre-owned vehicle marketplace that connects buyers with individual sellers and
           dealers across India. We provide inspection insights and verified listings — the
           transaction happens directly between buyer and seller with full transparency.
         </Section>
@@ -17,12 +17,12 @@ export function TermsOfService() {
         </Section>
         <Section title="Verification">
           A "Verified" badge indicates a seller has submitted identity (and for dealers, business) documents that
-          Luxura Motors has reviewed. It is not a guarantee of the seller's conduct or the vehicle's condition — always
+          Qwheelz has reviewed. It is not a guarantee of the seller's conduct or the vehicle's condition — always
           inspect a vehicle and verify its documents in person before making a payment.
         </Section>
         <Section title="Payments">
-          Luxura Motors does not process payment for vehicles bought or sold through the platform. Fees paid to
-          Luxura Motors (subscriptions, featured listings) are for marketplace visibility only.
+          Qwheelz does not process payment for vehicles bought or sold through the platform. Fees paid to
+          Qwheelz (subscriptions, featured listings) are for marketplace visibility only.
         </Section>
         <Section title="Account suspension">
           We may suspend accounts or remove listings that violate these terms, including fraudulent listings, spam,

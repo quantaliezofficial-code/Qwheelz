@@ -6,7 +6,6 @@ import {
   MapPin, 
   Phone, 
   MessageCircle, 
-  Sparkles,
   ArrowRight
 } from 'lucide-react';
 import { StaticHeroSection } from '../components/StaticHeroSection';
@@ -46,7 +45,7 @@ const TOP_INDIAN_BRANDS = [
   { name: 'Tata Motors', models: 'Tiago, Nexon, Punch', logo: '/brands/tatamotors.png' },
   { name: 'Hyundai', models: 'i20, Grand i10, Creta', logo: '/brands/hyundai.png' },
   { name: 'Mahindra', models: 'Bolero, Scorpio, XUV300', logo: '/brands/mahindra.png' },
-  { name: 'Kia', models: 'Seltos, Sonet, Carens', logo: '/brands/kia.png' },
+  { name: 'Kia', models: 'Seltos, Sonet, Careens', logo: '/brands/kia.png' },
   { name: 'Toyota', models: 'Glanza, Urban Cruiser', logo: '/brands/toyota.png' },
   { name: 'Honda', models: 'Amaze, City, Elevate', logo: '/brands/honda.png' },
   { name: 'Renault', models: 'Kwid, Kiger, Triber', logo: '/brands/renault.png' },
@@ -61,7 +60,7 @@ const THREE_STEPS = [
   {
     step: "02",
     title: "Lucknow Test Drive or Video Call",
-    description: "Visit our Lucknow Flagship showroom on Shaheed Path, or schedule a live 1-on-1 HD video tour with our technical specialist.",
+    description: "Visit our Lucknow Flagship showroom in Jankipuram, near JB Lawn, or schedule a live 1-on-1 HD video tour with our technical specialist.",
   },
   {
     step: "03",
@@ -86,7 +85,7 @@ const TESTIMONIALS = [
     role: "Toyota Fortuner Legender Buyer",
     tag: "Verified Buyer • RTO Transfer",
     rating: 5,
-    comment: "Finding a single-owner Fortuner in pristine condition without accident history is tough in the open market. Luxura verified the service records and handed over the transferred RC within 10 days.",
+    comment: "Finding a single-owner Fortuner in pristine condition without accident history is tough in the open market. Qwheelz verified the service records and handed over the transferred RC within 10 days.",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150"
   },
   {
@@ -141,7 +140,7 @@ export function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-blue-700 font-mono text-[10px] uppercase tracking-widest font-semibold block mb-1">
+            <span className="text-blue-700 font-sans text-xs uppercase tracking-widest font-bold block mb-1">
               Transparent Experience
             </span>
             <h2 className="text-xl sm:text-2xl font-sans font-black tracking-tight text-stone-950 uppercase">
@@ -197,7 +196,7 @@ export function HomePage() {
       {/* 4. POPULAR AUTOMAKERS IN INDIA (DIRECT BRAND TILES) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="text-center mb-10">
-          <span className="text-stone-500 font-mono text-[10px] uppercase tracking-widest font-semibold">
+          <span className="text-stone-500 font-sans text-xs uppercase tracking-widest font-bold">
             Certified Automakers
           </span>
           <h2 className="text-xl sm:text-2xl font-sans font-bold tracking-tight text-stone-900 mt-1 uppercase">
@@ -231,10 +230,9 @@ export function HomePage() {
       <section className="bg-white py-16 sm:py-20 border-y border-stone-200 text-stone-900 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-stone-100 text-stone-700 border border-stone-200 mb-3 shadow-2xs">
-              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-              <span>Curated Fleet By Category</span>
-            </div>
+            <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-blue-900 mb-2 font-sans">
+              Curated Fleet By Category
+            </p>
             <h2 className="text-2xl sm:text-4xl font-sans font-black tracking-tight text-stone-900 uppercase">
               Explore By Vehicle Type
             </h2>
@@ -263,7 +261,7 @@ export function HomePage() {
       <section className="bg-stone-50 py-16 border-y border-stone-200 mb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <span className="text-stone-500 font-mono text-[10px] uppercase tracking-widest font-semibold">
+            <span className="text-stone-500 font-sans text-xs uppercase tracking-widest font-bold">
               Verified Buyers
             </span>
             <h2 className="text-xl sm:text-2xl font-sans font-black tracking-tight text-stone-900 mt-1 uppercase">
@@ -312,7 +310,7 @@ export function HomePage() {
         <div className="bg-white text-stone-900 rounded-3xl p-6 sm:p-10 border border-stone-200 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-8">
           
           <div className="space-y-3 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-100 border border-stone-200 text-stone-700 text-[10px] font-mono uppercase font-bold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-100 border border-stone-200 text-stone-700 text-xs font-sans uppercase font-bold">
               <MapPin size={12} />
               <span>Visit Our Showroom &bull; Lucknow, UP</span>
             </div>
@@ -320,7 +318,7 @@ export function HomePage() {
               Have questions about a car? Talk directly to our local team.
             </h3>
             <p className="text-stone-500 text-xs font-light max-w-xl">
-              Shaheed Path, Gomti Nagar Extension, Lucknow. Speak with our certified vehicle specialists or get a live video walkaround of any car on your phone.
+              Qwheelz Experience Center, Jankipuram, near JB Lawn, Lucknow, Uttar Pradesh - 226021. Speak with our certified vehicle specialists or get a live video walkaround of any car on your phone.
             </p>
           </div>
 
@@ -329,7 +327,7 @@ export function HomePage() {
               href="https://wa.me/919839012345"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+              className="w-full sm:w-auto px-6 py-3.5 bg-blue-900 hover:bg-blue-950 text-white font-bold text-[11px] uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
             >
               <MessageCircle size={15} />
               <span>WhatsApp Concierge</span>

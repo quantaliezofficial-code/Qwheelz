@@ -63,16 +63,11 @@ export function LoginPage({ initialMode = "login" }: { initialMode?: "login" | "
       <div className="w-full max-w-md">
         {/* Brand header */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2">
-            <span className="text-2xl font-black tracking-widest uppercase text-stone-900">
-              LUXURA
-            </span>
-            <span className="text-xs tracking-wider uppercase text-blue-600 font-bold border-l border-stone-300 pl-2">
-              MOTORS
-            </span>
+          <Link to="/" className="inline-flex items-center justify-center">
+            <img src="/logo-wide.png" alt="QWheelz" className="h-10 w-auto object-contain" />
           </Link>
           <h2 className="mt-4 text-2xl font-black tracking-tight text-stone-900">
-            {mode === "login" ? "Welcome back to your showroom" : "Create your luxury account"}
+            {mode === "login" ? "Welcome back to QWheelz" : "Create your QWheelz account"}
           </h2>
           <p className="mt-1 text-sm text-stone-500">
             {mode === "login"

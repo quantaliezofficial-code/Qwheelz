@@ -16,7 +16,7 @@ async def seed():
 
         # Create a user
         u_id = uuid.uuid4()
-        u = User(id=u_id, name="Admin Showroom", email="admin@luxura.com", phone="9999999999", password_hash="test", role="admin", is_verified=True, rating_count=10, avg_rating=4.8)
+        u = User(id=u_id, name="Admin Showroom", email="admin@qwheelz.com", phone="9999999999", password_hash="test", role="admin", is_verified=True, rating_count=10, avg_rating=4.8)
         db.add(u)
         await db.commit()
         

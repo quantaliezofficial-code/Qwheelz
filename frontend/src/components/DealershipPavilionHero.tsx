@@ -74,7 +74,7 @@ export function DealershipPavilionHero() {
           >
             <img
               src={STAGES[currentStage].image}
-              alt="Luxura Motors Lucknow Showroom Entrance"
+              alt="Qwheelz Lucknow Showroom Entrance"
               className="w-full h-full object-cover object-center filter brightness-[0.7] contrast-[1.05]"
             />
           </motion.div>

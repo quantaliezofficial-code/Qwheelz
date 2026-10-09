@@ -154,7 +154,7 @@ function BecomeASellerFlow() {
       </div>
 
       {verification?.status === "rejected" && (
-        <div className="mb-4 rounded-lg border border-ember-200 bg-ember-50 px-4 py-3 text-sm text-ember-700">
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           Your previous application needs changes: {verification.rejection_reason}
         </div>
       )}
@@ -538,7 +538,7 @@ function ListingForm() {
               <FileText className="h-5 w-5 text-blue-600" />
               <h2 className="font-display text-base font-bold text-stone-900">3. Registration & RTO Details (India)</h2>
             </div>
-            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
               High Trust Field
             </span>
           </div>

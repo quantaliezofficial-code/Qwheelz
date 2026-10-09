@@ -76,7 +76,7 @@ export function Footer() {
               <li className="flex items-start space-x-3">
                 <MapPin className="w-4 h-4 mt-1 text-blue-600 shrink-0" />
                 <span className="text-stone-600">
-                  Luxura Experience Center, Shaheed Path, Gomti Nagar Ext., Lucknow, Uttar Pradesh - 226010
+                  Qwheelz Experience Center, Jankipuram, near JB Lawn, Lucknow, Uttar Pradesh - 226021
                 </span>
               </li>
               <li className="flex items-center space-x-3">
@@ -85,7 +85,7 @@ export function Footer() {
               </li>
               <li className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-blue-600 shrink-0" />
-                <span className="text-stone-600">lucknow@luxuramotors.com</span>
+                <span className="text-stone-600">lucknow@qwheelz.com</span>
               </li>
             </ul>
           </div>
@@ -94,7 +94,7 @@ export function Footer() {
           <div className="space-y-4 bg-white border border-blue-100/90 p-5 rounded-lg shadow-sm">
             <h3 className="text-sm font-semibold tracking-wider text-blue-950 uppercase mb-2 flex items-center space-x-2">
               <ShieldCheck className="w-4 h-4 text-blue-600" />
-              <span>Luxura Indian Assurance</span>
+              <span>Qwheelz Indian Assurance</span>
             </h3>
             <div className="text-xs text-stone-500 space-y-3 leading-relaxed">
               <p className="flex items-center space-x-2">
@@ -119,7 +119,7 @@ export function Footer() {
                 <HeartHandshake className="w-3.5 h-3.5 text-blue-600" />
                 <span>Verified Dealership</span>
               </span>
-              <span className="text-blue-700 font-mono font-bold flex items-center space-x-1">
+              <span className="text-blue-700 font-sans font-bold flex items-center space-x-1">
                 <Star className="w-3 h-3 text-blue-600 fill-current" />
                 <span>4.9/5 Rating</span>
               </span>

@@ -30,7 +30,7 @@ export function Hero() {
             Buy or sell your next car, <span className="text-ignition-400">without the middleman.</span>
           </h1>
           <p className="mt-5 max-w-xl text-lg text-fog/80">
-            Luxura Motors connects verified individual sellers and dealers directly with buyers across India —
+            Qwheelz connects verified individual sellers and dealers directly with buyers across India —
             browse real listings, chat directly, and close the deal on your terms.
           </p>
 

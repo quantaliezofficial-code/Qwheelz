@@ -144,11 +144,11 @@ function OverviewTab() {
 function ReasonPrompt({ onSubmit }: { onSubmit: (reason: string) => void }) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
-  if (!open) return <button onClick={() => setOpen(true)} className="rounded-lg border border-ember-200 px-2.5 py-1.5 text-xs font-semibold text-ember-600 hover:bg-ember-50"><XCircle size={12} className="mr-1 inline" />Reject</button>;
+  if (!open) return <button onClick={() => setOpen(true)} className="rounded-lg border border-red-200 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"><XCircle size={12} className="mr-1 inline" />Reject</button>;
   return (
     <div className="flex items-center gap-1">
       <input autoFocus value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason…" className="qz-input w-32 px-2 py-1 text-xs" />
-      <button onClick={() => reason.trim() && onSubmit(reason)} className="rounded-lg bg-ember-500 px-2 py-1 text-xs font-semibold text-white">Send</button>
+      <button onClick={() => reason.trim() && onSubmit(reason)} className="rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white">Send</button>
     </div>
   );
 }
@@ -379,7 +379,7 @@ function ReviewsTab() {
             <p className="text-sm font-semibold text-ink">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)} <span className="text-slate">by {r.buyer.name}</span></p>
             <p className="mt-1 text-sm text-slate">{r.content}</p>
           </div>
-          <button onClick={() => actions.deleteReview.mutate([r.id])} className="shrink-0 rounded-lg border border-ember-200 px-2.5 py-1.5 text-xs font-semibold text-ember-600 hover:bg-ember-50">Remove</button>
+          <button onClick={() => actions.deleteReview.mutate([r.id])} className="shrink-0 rounded-lg border border-red-200 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50">Remove</button>
         </div>
       ))}
     </div>
@@ -492,12 +492,12 @@ function AppointmentsTab() {
                     <span
                       className={`px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
                         appt.status === "confirmed"
-                          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                          ? "bg-blue-50 text-blue-800 border-blue-200"
                           : appt.status === "requested"
                           ? "bg-blue-50 text-blue-800 border-blue-200"
                           : appt.status === "completed"
                           ? "bg-stone-100 text-stone-700 border-stone-200"
-                          : "bg-amber-50 text-amber-800 border-amber-200"
+                          : "bg-slate-100 text-slate-800 border-slate-200"
                       }`}
                     >
                       {appt.status}
@@ -507,7 +507,7 @@ function AppointmentsTab() {
                     {appt.status === "requested" && (
                       <button
                         onClick={() => updateStatusMutation.mutate({ id: appt.id, status: "confirmed" })}
-                        className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-bold uppercase"
+                        className="px-2 py-1 bg-blue-900 hover:bg-blue-950 text-white rounded text-[10px] font-bold uppercase"
                       >
                         Confirm
                       </button>
@@ -627,7 +627,7 @@ function SupportAdminTab() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => updateStatusMutation.mutate({ id: activeTicketId, status: "resolved" })}
-                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer"
+                className="px-3 py-1.5 bg-blue-900 hover:bg-blue-950 text-white rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer"
               >
                 Mark Resolved
               </button>
@@ -704,7 +704,7 @@ function SupportAdminTab() {
                       ticket.status === "open"
                         ? "bg-blue-50 text-blue-800 border-blue-200"
                         : ticket.status === "resolved"
-                        ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                        ? "bg-blue-50 text-blue-800 border-blue-200"
                         : "bg-stone-100 text-stone-700 border-stone-200"
                     }`}
                   >

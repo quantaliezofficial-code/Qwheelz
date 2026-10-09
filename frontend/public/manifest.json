@@ -1,11 +1,11 @@
 {
-  "name": "Luxura Motors",
-  "short_name": "Luxura",
-  "description": "Premium Automotive Marketplace",
+  "name": "Qwheelz",
+  "short_name": "Qwheelz",
+  "description": "Certified Pre-Owned Automotive Network",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FAFAF9",
-  "theme_color": "#d97706",
+  "theme_color": "#1e3a8a",
   "icons": [
     {
       "src": "/favicon.ico",

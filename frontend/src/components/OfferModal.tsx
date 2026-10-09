@@ -78,7 +78,7 @@ export function OfferModal({
         </button>
 
         <div className="bg-stone-900 p-6 text-white">
-          <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-sky-300 text-xs font-bold uppercase tracking-wider mb-1">
             <Tag className="w-4 h-4" />
             <span>Price Negotiation</span>
           </div>
@@ -91,7 +91,7 @@ export function OfferModal({
         <div className="p-6">
           {success ? (
             <div className="py-8 text-center space-y-4">
-              <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto text-emerald-600 border border-emerald-200">
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto text-blue-600 border border-blue-200">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
               <h3 className="text-lg font-bold text-stone-900">Offer Submitted!</h3>
@@ -129,7 +129,7 @@ export function OfferModal({
                       onClick={() => applyDiscount(pct)}
                       className={`py-2 px-2 text-xs font-bold rounded-xl border text-center transition-all ${
                         discountPercent === pct
-                          ? "bg-emerald-50 border-emerald-600 text-emerald-800 shadow-xs"
+                          ? "bg-blue-50 border-blue-600 text-blue-800 shadow-xs"
                           : "bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100"
                       }`}
                     >
@@ -155,7 +155,7 @@ export function OfferModal({
                     value={offerAmount}
                     onChange={(e) => setOfferAmount(Number(e.target.value))}
                     required
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl pl-8 pr-4 py-3 text-lg font-bold text-stone-900 focus:border-emerald-600 focus:bg-white focus:outline-none"
+                    className="w-full bg-stone-50 border border-stone-200 rounded-xl pl-8 pr-4 py-3 text-lg font-bold text-stone-900 focus:border-blue-600 focus:bg-white focus:outline-none"
                   />
                 </div>
                 <div className="flex justify-between items-center mt-1.5 text-xs">
@@ -163,7 +163,7 @@ export function OfferModal({
                     Formatted: <span className="font-semibold text-stone-800">{formatINR(offerAmount)}</span>
                   </span>
                   {discountPercent > 0 ? (
-                    <span className="text-emerald-700 font-semibold">
+                    <span className="text-blue-700 font-semibold">
                       {discountPercent}% below asking price
                     </span>
                   ) : discountPercent < 0 ? (
@@ -186,7 +186,7 @@ export function OfferModal({
                   onChange={(e) => setMessage(e.target.value)}
                   rows={2}
                   placeholder="e.g., Willing to close immediately with token advance if offer is agreed."
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-2 text-sm text-stone-900 placeholder:text-stone-400 focus:border-emerald-600 focus:bg-white focus:outline-none resize-none"
+                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-2 text-sm text-stone-900 placeholder:text-stone-400 focus:border-blue-600 focus:bg-white focus:outline-none resize-none"
                 />
               </div>
 
@@ -194,7 +194,7 @@ export function OfferModal({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-700/20 text-xs uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
+                  className="w-full bg-blue-900 hover:bg-blue-950 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-950/20 text-xs uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? "Submitting Offer..." : `Send Offer (${formatINR(offerAmount)})`}
                 </button>

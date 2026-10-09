@@ -35,7 +35,7 @@ export function EnquiryThread({ enquiryId, onBack }: { enquiryId: string; onBack
         <div className="flex items-center gap-2">
           <StatusBadge status={enquiry.status} />
           {enquiry.status !== "closed" && (
-            <button onClick={() => closeEnquiry.mutate(enquiry.id)} className="text-xs font-semibold text-slate hover:text-ember-600">Close</button>
+            <button onClick={() => closeEnquiry.mutate(enquiry.id)} className="text-xs font-semibold text-slate-500 hover:text-blue-600">Close</button>
           )}
         </div>
       </div>

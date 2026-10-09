@@ -58,11 +58,11 @@
    ========================================================================== */
 
 @theme {
-  --font-display: "Montserrat", "Plus Jakarta Sans", sans-serif;
-  --font-serif: "Montserrat", "Plus Jakarta Sans", sans-serif;
-  --font-luxury: "Montserrat", "Plus Jakarta Sans", sans-serif;
-  --font-sans: "Plus Jakarta Sans", "Montserrat", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-serif: "Plus Jakarta Sans", sans-serif;
+  --font-luxury: "Plus Jakarta Sans", sans-serif;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+  --font-mono: "Plus Jakarta Sans", sans-serif;
 
   /* Core neutrals */
   --color-asphalt: #12151a;
@@ -86,24 +86,24 @@
   --color-ignition-800: #182c78;
   --color-ignition-900: #141f4d;
 
-  --color-ember-50: #fff2ed;
-  --color-ember-100: #ffe1d4;
-  --color-ember-200: #ffbea3;
-  --color-ember-300: #ff9670;
-  --color-ember-400: #ff6f42;
-  --color-ember-500: #f2501e;
-  --color-ember-600: #d43c11;
-  --color-ember-700: #ac2f0d;
-  --color-ember-800: #85260f;
-  --color-ember-900: #5c1c0e;
+  --color-ember-50: #eff6ff;
+  --color-ember-100: #dbeafe;
+  --color-ember-200: #bfdbfe;
+  --color-ember-300: #93c5fd;
+  --color-ember-400: #60a5fa;
+  --color-ember-500: #2563eb;
+  --color-ember-600: #1d4ed8;
+  --color-ember-700: #1e40af;
+  --color-ember-800: #1e3a8a;
+  --color-ember-900: #172554;
 
-  --color-signal-50: #eafbf3;
-  --color-signal-100: #cdf3e0;
-  --color-signal-500: #189c66;
-  --color-signal-600: #127f53;
-  --color-signal-700: #0f6642;
+  --color-signal-50: #eff6ff;
+  --color-signal-100: #dbeafe;
+  --color-signal-500: #2563eb;
+  --color-signal-600: #1d4ed8;
+  --color-signal-700: #1e40af;
 
-  --color-amber-signal: #d99516;
+  --color-amber-signal: #2563eb;
 
   --shadow-card: 0 1px 2px rgba(18, 21, 26, 0.06), 0 8px 24px -12px rgba(18, 21, 26, 0.18);
   --shadow-lifted: 0 12px 32px -8px rgba(18, 21, 26, 0.28);
@@ -158,12 +158,12 @@
   }
 
   .qz-btn-primary {
-    background: var(--color-ember-500);
+    background: #1e3a8a;
     color: var(--color-white);
-    transition: background-color 150ms ease, transform 150ms ease;
+    transition: background-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
   }
   .qz-btn-primary:hover {
-    background: var(--color-ember-600);
+    background: #172554;
   }
   .qz-btn-primary:active {
     transform: scale(0.98);

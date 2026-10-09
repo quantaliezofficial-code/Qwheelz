@@ -384,12 +384,7 @@ export function ArcarHeroShowcase() {
             </motion.button>
           ) : (
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-              <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-slate-950 font-black text-sm tracking-tighter shadow-md">
-                LM
-              </div>
-              <span className="font-extrabold text-lg sm:text-xl tracking-tight text-slate-900">
-                LUXURA <span className="text-amber-600">MOTORS</span>
-              </span>
+              <img src="/logo-wide.png" alt="QWheelz" className="h-8 w-auto object-contain" />
             </div>
           )}
         </div>
@@ -552,7 +547,7 @@ export function ArcarHeroShowcase() {
                       Seating Capacity
                     </div>
                   </div>
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                     <Users className="w-4 h-4" />
                   </div>
                 </div>
@@ -567,7 +562,7 @@ export function ArcarHeroShowcase() {
                       Top Speed
                     </div>
                   </div>
-                  <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                     <Gauge className="w-4 h-4" />
                   </div>
                 </div>
@@ -643,7 +638,7 @@ export function ArcarHeroShowcase() {
                   className="px-6 py-2.5 rounded-full bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs shadow-md tracking-wider uppercase transition-all cursor-pointer hover:shadow-lg active:scale-95 flex items-center gap-2"
                 >
                   <span>Book Test Drive / Enquire</span>
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-sky-300" />
                 </button>
                 <button
                   onClick={() => setIsDetailsOpen(false)}
@@ -664,7 +659,7 @@ export function ArcarHeroShowcase() {
             <div className="flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-xs">
               <span className="text-[11px] font-mono uppercase font-bold text-slate-500 tracking-wider">Certified Price:</span>
               <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight">{currentCar.sellingPrice}</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-100 text-blue-900 border border-blue-300">
                 200-Pt Verified
               </span>
             </div>
