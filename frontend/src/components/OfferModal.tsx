@@ -96,7 +96,7 @@ export function OfferModal({
               </div>
               <h3 className="text-lg font-bold text-stone-900">Offer Submitted!</h3>
               <p className="text-sm text-stone-600 max-w-md mx-auto">
-                Your offer of <span className="font-semibold text-stone-900">{formatINR(offerAmount)}</span> has been sent to the seller. The seller may accept, counter, or decline your offer. You will be notified in your Account Hub.
+                Your offer of <span className="font-semibold text-stone-900">{formatINR(offerAmount)}</span> has been submitted to the Qwheelz Brokerage Desk in Lucknow. Our broker team will evaluate the offer, negotiate on your behalf with the vehicle owner, and contact you with counter-terms or confirmation.
               </p>
               <div className="pt-4">
                 <button

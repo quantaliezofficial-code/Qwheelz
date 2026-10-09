@@ -99,7 +99,7 @@ export function TestDriveModal({
               <h3 className="text-lg font-bold text-stone-900">Appointment Requested!</h3>
               <p className="text-sm text-stone-600 max-w-md mx-auto">
                 Your request for a {appointmentType === "test_drive" ? "Test Drive" : "Vehicle Inspection"} on{" "}
-                <span className="font-semibold text-stone-900">{scheduledDate}</span> ({timeSlot}) has been sent to the seller. You can monitor the confirmation in your Account Hub.
+                <span className="font-semibold text-stone-900">{scheduledDate}</span> ({timeSlot}) has been sent to the Qwheelz Brokerage Desk in Lucknow. Our broker team will verify slot availability and contact you shortly.
               </p>
               <div className="pt-4">
                 <button

@@ -3,9 +3,10 @@ import type { VehicleListing } from '../types';
 
 interface CompareContextType {
   compareList: VehicleListing[];
-  addToCompare: (car: VehicleListing) => void;
+  addToCompare: (car: VehicleListing) => boolean;
   removeFromCompare: (carId: string) => void;
   clearCompare: () => void;
+  isInCompare: (carId: string) => boolean;
 }
 
 const CompareContext = createContext<CompareContextType | undefined>(undefined);
@@ -13,7 +14,7 @@ const CompareContext = createContext<CompareContextType | undefined>(undefined);
 export function CompareProvider({ children }: { children: React.ReactNode }) {
   const [compareList, setCompareList] = useState<VehicleListing[]>(() => {
     try {
-      const saved = localStorage.getItem("luxura_compare");
+      const saved = localStorage.getItem("qwheelz_compare") || localStorage.getItem("luxura_compare");
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -21,20 +22,25 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    localStorage.setItem("luxura_compare", JSON.stringify(compareList));
+    localStorage.setItem("qwheelz_compare", JSON.stringify(compareList));
   }, [compareList]);
 
-  const addToCompare = (car: VehicleListing) => {
-    if (compareList.find(c => c.id === car.id)) return;
+  const isInCompare = (carId: string) => {
+    return compareList.some(c => c.id === carId);
+  };
+
+  const addToCompare = (car: VehicleListing): boolean => {
+    if (compareList.some(c => c.id === car.id)) return true;
     if (compareList.length >= 3) {
-      alert("You can compare up to 3 cars at a time.");
-      return;
+      alert("You can compare up to 3 vehicles at a time. Remove one to add this vehicle.");
+      return false;
     }
-    setCompareList([...compareList, car]);
+    setCompareList(prev => [...prev, car]);
+    return true;
   };
 
   const removeFromCompare = (carId: string) => {
-    setCompareList(compareList.filter(c => c.id !== carId));
+    setCompareList(prev => prev.filter(c => c.id !== carId));
   };
 
   const clearCompare = () => {
@@ -42,7 +48,7 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <CompareContext.Provider value={{ compareList, addToCompare, removeFromCompare, clearCompare }}>
+    <CompareContext.Provider value={{ compareList, addToCompare, removeFromCompare, clearCompare, isInCompare }}>
       {children}
     </CompareContext.Provider>
   );

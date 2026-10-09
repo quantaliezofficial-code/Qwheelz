@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Eye, MessageSquare, Plus, Rocket, Upload, Calendar, Tag, Check, CheckCircle2, X, Clock, AlertCircle } from "lucide-react";
+import { Eye, MessageSquare, Plus, Rocket, Upload, Calendar, Tag, Check, CheckCircle2, X, Clock, AlertCircle, Phone, MessageCircle } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMyListings, useMarkListingSold, useUploadListingImage, usePromoteListing } from "../hooks/useListings";
 import { useMyEnquiries } from "../hooks/useEnquiries";
@@ -30,6 +30,40 @@ export function SellerDashboard() {
         <Link to="/sell" className="qz-btn-primary flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold">
           <Plus size={16} /> Add vehicle
         </Link>
+      </div>
+
+      {/* Qwheelz Brokerage Concierge Notice for Sellers */}
+      <div className="mb-6 p-4 rounded-2xl bg-blue-50/70 border border-blue-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-blue-900 text-white font-black text-xs flex items-center justify-center shrink-0">
+            QZ
+          </div>
+          <div>
+            <h3 className="text-xs font-bold text-blue-950 uppercase tracking-wider">Qwheelz Broker Desk For Sellers</h3>
+            <p className="text-xs text-blue-900/80 mt-0.5">
+              Direct buyer-seller contacts are managed through Qwheelz. All inspection visits, earnest tokens, and RTO title transfers are coordinated by our Admin brokerage team.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <a
+            href="tel:+915224008888"
+            className="px-3.5 py-2 rounded-xl bg-white border border-blue-200 text-blue-900 font-bold text-xs hover:bg-blue-50 transition-colors flex items-center gap-1.5"
+          >
+            <Phone size={13} className="text-blue-700" />
+            <span>Call Admin</span>
+          </a>
+          <a
+            href="https://wa.me/919839012345?text=Hello%20Qwheelz%20Admin%20Broker,%20I%20am%20a%20seller%20and%20need%20assistance%20with%20my%20vehicle%20listing."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3.5 py-2 rounded-xl bg-blue-900 text-white font-bold text-xs hover:bg-blue-950 transition-colors flex items-center gap-1.5"
+          >
+            <MessageCircle size={13} />
+            <span>WhatsApp Admin</span>
+          </a>
+        </div>
       </div>
 
       <div className="mb-6 flex gap-1 border-b border-fog overflow-x-auto qz-scroll">

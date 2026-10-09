@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
-  Calendar, Camera, Flag, Fuel, Gauge, Heart, Palette, Settings2, ShieldCheck, Star, Truck, Users, Activity, Zap, Ruler, Wallet, Check, PieChart, LineChart, Flame, RotateCcw, BarChart2, CheckCircle2, FileText, Lock, Key, Wrench, MapPin, Shield, Tag, HelpCircle
+  Calendar, Camera, Flag, Fuel, Gauge, Heart, Palette, Settings2, ShieldCheck, Star, Truck, Users, Activity, Zap, Ruler, Wallet, Check, PieChart, LineChart, Flame, RotateCcw, BarChart2, CheckCircle2, FileText, Lock, Key, Wrench, MapPin, Shield, Tag, HelpCircle, Phone, MessageCircle
 } from "lucide-react";
 import { useListing, useToggleFavourite } from "../hooks/useListings";
 import { useCreateEnquiry } from "../hooks/useEnquiries";
 import { useRecentlyViewed } from "../hooks/useRecentlyViewed";
+import { useCompare } from "../context/CompareContext";
 import { useAuth } from "../lib/auth";
 import { EmptyState, ErrorNote, formatINR, formatKm, LoadingBlock, VerifiedPlate } from "../components/ui";
 import { Viewer360 } from "../components/luxura/Viewer360";
@@ -78,6 +79,19 @@ export function ListingDetailPage() {
   const toggleFavourite = useToggleFavourite();
   const createEnquiry = useCreateEnquiry();
   const { addViewed } = useRecentlyViewed();
+  const { addToCompare, isInCompare } = useCompare();
+
+  const inCompare = listing ? isInCompare(listing.id) : false;
+
+  const handleToggleCompare = () => {
+    if (!listing) return;
+    if (inCompare) {
+      navigate('/compare');
+    } else {
+      addToCompare(listing);
+      navigate('/compare');
+    }
+  };
 
   const [activeImage, setActiveImage] = useState(0);
   const [message, setMessage] = useState("");
@@ -209,8 +223,17 @@ export function ListingDetailPage() {
               <div className="flex flex-col sm:flex-row sm:items-center gap-4 mt-6 pb-6 border-b border-stone-200">
                 <div className="flex items-center gap-3">
                   <p className="text-3xl font-black text-stone-900 tracking-tight">{formatINR(listing.price)}</p>
-                  <button onClick={() => navigate(`/compare?id1=${listing.id}`)} className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 text-stone-600 text-xs font-bold uppercase tracking-wide rounded-md border border-stone-200 hover:bg-stone-200 transition-colors">
-                    <BarChart2 className="w-3.5 h-3.5" /> Compare
+                  <button
+                    type="button"
+                    onClick={handleToggleCompare}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wide rounded-md border transition-colors cursor-pointer ${
+                      inCompare
+                        ? "bg-blue-100 border-blue-400 text-blue-950 font-extrabold"
+                        : "bg-stone-100 text-stone-600 border-stone-200 hover:bg-stone-200"
+                    }`}
+                  >
+                    <BarChart2 className="w-3.5 h-3.5 text-blue-700" />
+                    {inCompare ? "In Comparison (View)" : "Compare"}
                   </button>
                 </div>
                 
@@ -629,69 +652,100 @@ export function ListingDetailPage() {
                 ) : null}
               </div>
 
-              {/* Seller Info */}
+              {/* Qwheelz Managed Brokerage Desk Info */}
               <div className="py-4 border-b border-stone-100">
-                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest mb-2">Presented by</p>
-                <Link to={`/showroom/${listing.seller.id}`} className="flex items-center justify-between group hover:bg-stone-50 p-2 -mx-2 rounded-lg transition-colors">
-                  <div>
-                    <p className="text-sm font-bold text-stone-900 group-hover:text-blue-700">{listing.seller.business_name || listing.seller.name}</p>
-                    <p className="text-[10px] capitalize text-stone-500 font-medium">{listing.seller.seller_type ?? "seller"}</p>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] text-blue-900 font-extrabold uppercase tracking-widest bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
+                    Qwheelz Managed Brokerage
+                  </span>
+                  <VerifiedPlate label="ADMIN CERTIFIED" />
+                </div>
+                
+                <div className="p-3 bg-stone-50 border border-stone-200/80 rounded-xl mt-2">
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-blue-900 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
+                      QZ
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-stone-900">Qwheelz Brokerage & Inspection Hub</p>
+                      <p className="text-[10px] text-stone-500">Dedicated Broker Facilitation • Zero Direct Hassle</p>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    {listing.seller.is_verified && <VerifiedPlate />}
-                    {listing.seller.avg_rating && (
-                      <span className="flex items-center gap-1 rounded bg-blue-50 border border-blue-200 px-2 py-0.5 text-[10px] font-bold text-blue-800 shadow-sm">
-                        <Star size={10} className="fill-blue-600 text-blue-600" /> {Number(listing.seller.avg_rating).toFixed(1)}
-                      </span>
-                    )}
-                  </div>
-                </Link>
-                <div className="mt-2 text-xs text-stone-500">
-                  <span className="block font-medium">Available at:</span>
-                  <span>{listing.city} Showroom</span>
+                  <p className="text-[11px] text-stone-600 leading-relaxed border-t border-stone-200/60 pt-2 mt-2">
+                    Managed Deal: All vehicle inspections, negotiations, token escrow, and RTO paperwork are handled directly by Qwheelz Admin specialists.
+                  </p>
+                </div>
+
+                <div className="mt-2.5 text-xs text-stone-500 flex items-center gap-1.5">
+                  <MapPin size={13} className="text-blue-700 shrink-0" />
+                  <span>Physical Hub: <strong className="text-stone-800">Jankipuram near JB Lawn, Lucknow</strong></span>
                 </div>
               </div>
 
+              {/* Direct Broker Instant Contact Buttons */}
+              <div className="grid grid-cols-2 gap-2 mt-3 mb-4">
+                <a
+                  href="tel:+915224008888"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-900 font-bold text-xs uppercase tracking-wider rounded-xl border border-stone-200 transition-colors"
+                >
+                  <Phone size={14} className="text-blue-700" />
+                  <span>Call Broker</span>
+                </a>
+
+                <a
+                  href={`https://wa.me/919839012345?text=${encodeURIComponent(`Hello Qwheelz Broker, I am interested in booking/inspecting the ${listing.year} ${listing.brand} ${listing.model} (${formatINR(Number(listing.price))}) in ${listing.city} (ID: ${listing.id}). Please assist me.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-900 font-bold text-xs uppercase tracking-wider rounded-xl border border-blue-200 transition-colors"
+                >
+                  <MessageCircle size={14} className="text-blue-700" />
+                  <span>WhatsApp</span>
+                </a>
+              </div>
+
               {isOwnListing ? (
-                <Link to="/dashboard" className="w-full py-3.5 mt-6 bg-stone-100 hover:bg-stone-200 text-stone-800 font-extrabold text-xs tracking-wider uppercase rounded-lg border border-stone-200 transition-all text-center block">
+                <Link to="/dashboard" className="w-full py-3.5 mt-4 bg-stone-100 hover:bg-stone-200 text-stone-800 font-extrabold text-xs tracking-wider uppercase rounded-xl border border-stone-200 transition-all text-center block">
                   Manage this listing
                 </Link>
               ) : sent ? (
-                <p className="mt-6 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800 font-medium">Request sent! A Concierge will contact you shortly.</p>
+                <p className="mt-4 rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800 font-medium">
+                  Request sent! A dedicated Qwheelz Broker will contact you shortly.
+                </p>
               ) : (
-                <div className="mt-6">
+                <div className="mt-2">
                   {bookingSuccess ? (
-                    <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
+                    <div className="mb-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
                       <Check className="w-5 h-5 text-blue-600 shrink-0" />
                       <div>
                         <p className="text-sm font-bold text-blue-900">Vehicle Reserved</p>
-                        <p className="text-xs text-blue-700 mt-1">You have successfully blocked this vehicle. Our team will contact you to finalize the transaction.</p>
+                        <p className="text-xs text-blue-700 mt-1">You have successfully blocked this vehicle. Our broker team will contact you to finalize the transaction.</p>
                       </div>
                     </div>
                   ) : (
-                    <div className="mb-6 space-y-3">
+                    <div className="mb-4 space-y-2.5">
                       <button
+                        type="button"
                         onClick={() => setBookingOpen(true)}
-                        className="w-full bg-stone-900 hover:bg-stone-800 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all flex justify-center items-center gap-2"
+                        className="w-full bg-blue-900 hover:bg-blue-950 text-white font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-xl shadow-md shadow-blue-950/20 transition-all flex justify-center items-center gap-2 cursor-pointer"
                       >
-                        <ShieldCheck className="w-5 h-5" />
-                        Block this Car @ ₹999
+                        <ShieldCheck className="w-5 h-5 text-sky-300" />
+                        <span>Book this Vehicle @ ₹999</span>
                       </button>
                       <p className="text-[11px] text-stone-500 text-center flex items-center justify-center gap-1">
-                        <Check className="w-3 h-3" /> Fully refundable. Reserve for 48 hours.
+                        <Check className="w-3 h-3 text-blue-600" /> Fully refundable • Reserve for 48 hours with Broker Desk
                       </p>
 
-                      <div className="grid grid-cols-2 gap-2 pt-1">
+                      <div className="grid grid-cols-3 gap-2 pt-1.5">
                         <button
                           type="button"
                           onClick={() => {
                             if (!user) setAuthOpen(true);
                             else setTestDriveOpen(true);
                           }}
-                          className="w-full bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 font-bold py-2.5 px-3 rounded-xl transition-all flex justify-center items-center gap-1.5 text-xs uppercase tracking-wider"
+                          className="w-full bg-stone-50 hover:bg-blue-50 text-stone-800 hover:text-blue-900 border border-stone-200 font-bold py-2 px-1 rounded-xl transition-all flex flex-col items-center justify-center text-[10px] uppercase tracking-wider cursor-pointer"
                         >
-                          <Calendar className="w-3.5 h-3.5 text-blue-700" />
-                          Test Drive
+                          <Calendar className="w-4 h-4 text-blue-700 mb-1" />
+                          <span>Test Drive</span>
                         </button>
                         <button
                           type="button"
@@ -699,41 +753,57 @@ export function ListingDetailPage() {
                             if (!user) setAuthOpen(true);
                             else setOfferOpen(true);
                           }}
-                          className="w-full bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 font-bold py-2.5 px-3 rounded-xl transition-all flex justify-center items-center gap-1.5 text-xs uppercase tracking-wider"
+                          className="w-full bg-stone-50 hover:bg-blue-50 text-stone-800 hover:text-blue-900 border border-stone-200 font-bold py-2 px-1 rounded-xl transition-all flex flex-col items-center justify-center text-[10px] uppercase tracking-wider cursor-pointer"
                         >
-                          <Tag className="w-3.5 h-3.5 text-blue-700" />
-                          Make Offer
+                          <Tag className="w-4 h-4 text-blue-700 mb-1" />
+                          <span>Make Offer</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleToggleCompare}
+                          className={`w-full border font-bold py-2 px-1 rounded-xl transition-all flex flex-col items-center justify-center text-[10px] uppercase tracking-wider cursor-pointer ${
+                            inCompare
+                              ? "bg-blue-100 border-blue-400 text-blue-950 font-black"
+                              : "bg-stone-50 hover:bg-blue-50 text-stone-800 hover:text-blue-900 border-stone-200"
+                          }`}
+                        >
+                          <BarChart2 className="w-4 h-4 text-blue-700 mb-1" />
+                          <span>{inCompare ? "In Matrix" : "Compare"}</span>
                         </button>
                       </div>
                     </div>
                   )}
 
-                  <p className="text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Or Enquire First</p>
+                  <p className="text-xs font-bold text-stone-900 uppercase tracking-wider mb-2 mt-4">
+                    Inquire with Broker Desk
+                  </p>
                   <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     rows={3}
-                    placeholder="Hi, I'm interested in viewing or purchasing this vehicle."
-                    className="w-full bg-stone-50 border border-stone-200 rounded-lg px-4 py-3 text-sm focus:border-blue-600 focus:outline-none custom-scrollbar resize-none"
+                    placeholder="Ask Qwheelz Broker regarding test drive timing, RTO transfer, or home delivery..."
+                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:border-blue-600 focus:outline-none custom-scrollbar resize-none placeholder:text-stone-400"
                   />
                   {!user ? (
                     <button
+                      type="button"
                       onClick={() => setAuthOpen(true)}
-                      className="w-full py-3.5 mt-3 bg-blue-900 hover:bg-blue-950 text-white font-extrabold text-xs tracking-wider uppercase rounded-lg shadow-lg shadow-blue-950/20 transition-all cursor-pointer flex items-center justify-center gap-2"
+                      className="w-full py-3 mt-2.5 bg-blue-900 hover:bg-blue-950 text-white font-bold text-xs tracking-wider uppercase rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
                     >
-                      <span>Sign In to Contact Seller</span>
+                      <span>Sign In to Contact Broker</span>
                     </button>
                   ) : (
                     <button
+                      type="button"
                       onClick={handleEnquiry}
                       disabled={createEnquiry.isPending || !message.trim()}
-                      className="w-full py-3.5 mt-3 bg-stone-900 hover:bg-stone-800 text-white font-extrabold text-xs tracking-wider uppercase rounded-lg shadow-lg shadow-stone-950/20 disabled:opacity-50 transition-all cursor-pointer"
+                      className="w-full py-3 mt-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs tracking-wider uppercase rounded-xl shadow-md disabled:opacity-50 transition-all cursor-pointer"
                     >
-                      {createEnquiry.isPending ? "Sending..." : "Contact Concierge"}
+                      {createEnquiry.isPending ? "Submitting Inquiry…" : "Send to Qwheelz Broker"}
                     </button>
                   )}
                   {createEnquiry.isError && (
-                    <p className="mt-3 text-xs text-red-600 font-medium">
+                    <p className="mt-2 text-xs text-red-600 font-medium">
                       {createEnquiry.error instanceof ApiError ? createEnquiry.error.message : "Couldn't send your message."}
                     </p>
                   )}
@@ -909,6 +979,43 @@ export function ListingDetailPage() {
         listingTitle={listing.title}
         defaultCategory="vehicle"
       />
+
+      {/* Mobile Fixed Contact & Booking Bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-200 p-3 shadow-2xl flex items-center justify-between gap-2">
+        <div className="min-w-0 pr-1">
+          <p className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">Fixed Price</p>
+          <p className="text-base sm:text-lg font-black text-stone-900 leading-tight truncate">{formatINR(Number(listing.price))}</p>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          <a
+            href="tel:+915224008888"
+            className="p-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl border border-stone-200 flex items-center justify-center transition-colors"
+            title="Call Broker"
+          >
+            <Phone size={16} className="text-blue-700" />
+          </a>
+
+          <a
+            href={`https://wa.me/919839012345?text=${encodeURIComponent(`Hello Qwheelz Broker, I am interested in ${listing.title} (${formatINR(Number(listing.price))}). Please share details.`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl border border-blue-200 flex items-center justify-center transition-colors"
+            title="WhatsApp Broker"
+          >
+            <MessageCircle size={16} />
+          </a>
+
+          <button
+            type="button"
+            onClick={() => setBookingOpen(true)}
+            className="px-3.5 py-2.5 bg-blue-900 hover:bg-blue-950 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <ShieldCheck size={14} className="text-sky-300" />
+            <span>Book @ ₹999</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
