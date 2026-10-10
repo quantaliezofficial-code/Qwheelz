@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Bell, Car, Heart, LayoutDashboard, LogOut, Menu, MessageSquare, Shield, User as UserIcon, X, MapPin, ChevronDown, Zap, Search, Calendar, ChevronRight, Settings2, CheckCircle2 } from "lucide-react";
+import { Bell, Car, Heart, LayoutDashboard, LogOut, Menu, MessageSquare, Shield, User as UserIcon, X, MapPin, ChevronDown, Zap, Search, Calendar, ChevronRight, Settings2, CheckCircle2, Phone } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { useNotifications, useUnreadCount, useMarkAllNotificationsRead, useMarkNotificationRead } from "../hooks/useNotifications";
 import { AuthModal } from "./AuthModal";
@@ -188,9 +188,7 @@ export function Header() {
         ...(user?.role === 'seller' 
             ? [{ label: 'Seller Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-4 h-4" /> }]
             : [{ label: 'Sell Your Car', path: '/sell', icon: <Car className="w-4 h-4" /> }]),
-        ...(user?.role === 'buyer'
-            ? [{ label: 'My Enquiries', path: '/enquiries', icon: <MessageSquare className="w-4 h-4" /> }]
-            : []),
+        { label: 'Contact Us', path: '/contact', icon: <Phone className="w-4 h-4" /> },
       ];
 
   return (
@@ -312,6 +310,9 @@ export function Header() {
                           <div className="space-y-3">
                             <Link to="/sell" onClick={() => setMoreOpen(false)} className="flex items-center text-sm font-medium text-stone-700 hover:text-blue-700 transition-colors group">
                               Sell Your Car <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-all text-blue-600" />
+                            </Link>
+                            <Link to="/contact" onClick={() => setMoreOpen(false)} className="flex items-center text-sm font-medium text-stone-700 hover:text-blue-700 transition-colors group">
+                              Contact Us <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-all text-blue-600" />
                             </Link>
                             <Link to="/terms" onClick={() => setMoreOpen(false)} className="flex items-center text-sm font-medium text-stone-700 hover:text-blue-700 transition-colors group">
                               Terms of Service <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-all text-blue-600" />

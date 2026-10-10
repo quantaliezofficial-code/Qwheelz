@@ -50,6 +50,7 @@ export function Footer() {
                 : [
                     { label: "Premium Inventory", path: "/cars" },
                     { label: "Sell Your Vehicle", path: "/sell" },
+                    { label: "Contact Us", path: "/contact" },
                     { label: "Privacy Policy", path: "/privacy" },
                     { label: "Terms of Service", path: "/terms" },
                   ]

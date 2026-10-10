@@ -19,6 +19,7 @@ const TermsOfService = lazy(() => import("./pages/TermsOfService").then((m) => (
 const ComparePage = lazy(() => import("./pages/ComparePage").then((m) => ({ default: m.ComparePage })));
 const WizardPage = lazy(() => import("./pages/WizardPage").then((m) => ({ default: m.WizardPage })));
 const AccountPage = lazy(() => import("./pages/AccountPage").then((m) => ({ default: m.AccountPage })));
+const ContactPage = lazy(() => import("./pages/ContactPage").then((m) => ({ default: m.ContactPage })));
 const NotFound = lazy(() => import("./pages/NotFound").then((m) => ({ default: m.NotFound })));
 
 function PageFallback() {
@@ -59,6 +60,7 @@ export default function App() {
               <Route path="/enquiries" element={<RequireRole role={["buyer", "seller", "admin"]}><EnquiriesPage initialTab="enquiries" /></RequireRole>} />
               <Route path="/favourites" element={<RequireRole role={["buyer", "seller", "admin"]}><EnquiriesPage initialTab="favourites" /></RequireRole>} />
               <Route path="/admin" element={<RequireRole role="admin"><AdminDashboard /></RequireRole>} />
+              <Route path="/contact" element={<ContactPage />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="*" element={<NotFound />} />
