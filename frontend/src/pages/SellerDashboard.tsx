@@ -32,36 +32,36 @@ export function SellerDashboard() {
         </Link>
       </div>
 
-      {/* Qwheelz Brokerage Concierge Notice for Sellers */}
+      {/* Direct Buyer Connection Notice for Sellers */}
       <div className="mb-6 p-4 rounded-2xl bg-blue-50/70 border border-blue-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="w-9 h-9 rounded-xl bg-blue-900 text-white font-black text-xs flex items-center justify-center shrink-0">
             QZ
           </div>
           <div>
-            <h3 className="text-xs font-bold text-blue-950 uppercase tracking-wider">Qwheelz Broker Desk For Sellers</h3>
+            <h3 className="text-xs font-bold text-blue-950 uppercase tracking-wider">Direct Buyer Connection Active</h3>
             <p className="text-xs text-blue-900/80 mt-0.5">
-              Direct buyer-seller contacts are managed through Qwheelz. All inspection visits, earnest tokens, and RTO title transfers are coordinated by our Admin brokerage team.
+              Buyers can contact you directly via Call, WhatsApp, and in-app messages. Manage appointments, direct offers, and reservation tokens below with 0% brokerage.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           <a
-            href="tel:+915224008888"
+            href="tel:+919839012345"
             className="px-3.5 py-2 rounded-xl bg-white border border-blue-200 text-blue-900 font-bold text-xs hover:bg-blue-50 transition-colors flex items-center gap-1.5"
           >
             <Phone size={13} className="text-blue-700" />
-            <span>Call Admin</span>
+            <span>Support Helpline</span>
           </a>
           <a
-            href="https://wa.me/919839012345?text=Hello%20Qwheelz%20Admin%20Broker,%20I%20am%20a%20seller%20and%20need%20assistance%20with%20my%20vehicle%20listing."
+            href="https://wa.me/919839012345?text=Hello%20Qwheelz%20Support,%20I%20am%20a%20seller%20and%20need%20assistance%20with%20my%20vehicle%20listing."
             target="_blank"
             rel="noopener noreferrer"
             className="px-3.5 py-2 rounded-xl bg-blue-900 text-white font-bold text-xs hover:bg-blue-950 transition-colors flex items-center gap-1.5"
           >
             <MessageCircle size={13} />
-            <span>WhatsApp Admin</span>
+            <span>WhatsApp Support</span>
           </a>
         </div>
       </div>

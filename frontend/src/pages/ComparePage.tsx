@@ -19,9 +19,11 @@ import {
   MapPin,
   Calendar,
   MessageCircle,
+  Phone,
 } from "lucide-react";
 import { formatINR, formatKm, VerifiedPlate } from "../components/ui";
 import { BookingModal } from "../components/luxura/BookingModal";
+import { ContactSellerModal } from "../components/ContactSellerModal";
 import type { VehicleListing } from "../types";
 
 function calculateEstimatedEMI(price: number): number {
@@ -64,8 +66,9 @@ export function ComparePage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Booking modal state
+  // Booking & Contact modal states
   const [bookingCar, setBookingCar] = useState<VehicleListing | null>(null);
+  const [contactCar, setContactCar] = useState<VehicleListing | null>(null);
 
   // Auto-load car from query params (?id= or ?id1= or ?id2=) if not already loaded
   useEffect(() => {
@@ -662,7 +665,7 @@ export function ComparePage() {
                   })}
 
                   {/* =========================================================================
-                      SECTION 4: QWHEELZ ASSURANCE & BROKERAGE GUARANTEES
+                      SECTION 4: QWHEELZ ASSURANCE & DIRECT VERIFICATION GUARANTEES
                       ========================================================================= */}
                   <tr className="bg-stone-100/70">
                     <td
@@ -736,17 +739,16 @@ export function ComparePage() {
                             onClick={() => setBookingCar(c)}
                             className="w-full text-center bg-blue-900 text-white text-xs font-bold uppercase tracking-wider py-2.5 rounded-xl hover:bg-blue-950 transition-colors shadow-sm cursor-pointer"
                           >
-                            Block @ ₹999
+                            Buy Now @ ₹999
                           </button>
-                          <a
-                            href={`https://wa.me/919839012345?text=${encodeURIComponent(`Hello Qwheelz Broker, I am comparing cars on your website and would like details on the ${c.year} ${c.brand} ${c.model} (${formatINR(Number(c.price))}) in ${c.city}.`)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full text-center bg-white border border-stone-300 text-stone-800 text-xs font-bold uppercase tracking-wider py-2 rounded-xl hover:bg-stone-100 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                          <button
+                            type="button"
+                            onClick={() => setContactCar(c)}
+                            className="w-full text-center bg-white border border-stone-300 text-stone-800 text-xs font-bold uppercase tracking-wider py-2 rounded-xl hover:bg-blue-50 hover:text-blue-900 hover:border-blue-300 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                           >
-                            <MessageCircle size={13} className="text-blue-700" />
-                            WhatsApp Broker
-                          </a>
+                            <Phone size={13} className="text-blue-700" />
+                            <span>Contact Seller</span>
+                          </button>
                         </div>
                       </td>
                     ))}
@@ -889,13 +891,22 @@ export function ComparePage() {
         </div>
       )}
 
-      {/* Booking Modal (When user clicks Block @ ₹999 on any compared car) */}
+      {/* Contact Seller Modal */}
+      {contactCar && (
+        <ContactSellerModal
+          isOpen={!!contactCar}
+          onClose={() => setContactCar(null)}
+          listing={contactCar}
+        />
+      )}
+
+      {/* Booking Modal (When user clicks Buy Now @ ₹999 on any compared car) */}
       {bookingCar && (
         <BookingModal
           isOpen={!!bookingCar}
           onClose={() => setBookingCar(null)}
           onSuccess={() => {
-            alert(`Vehicle ${bookingCar.title} successfully reserved! A Qwheelz broker will contact you shortly.`);
+            alert(`Vehicle ${bookingCar.title} successfully reserved! You can now contact the seller directly to finalize purchase.`);
             setBookingCar(null);
           }}
           brand={bookingCar.brand}

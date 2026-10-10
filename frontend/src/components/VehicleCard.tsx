@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Star, Camera, ShieldCheck, Truck, BarChart2 } from "lucide-react";
+import { Heart, Camera, ShieldCheck, Truck, BarChart2, Phone } from "lucide-react";
 import type { VehicleListing } from "../types";
 import { formatINR, formatKm } from "./ui";
 import { useAuth } from "../lib/auth";
 import { useToggleFavourite } from "../hooks/useListings";
 import { AuthModal } from "./AuthModal";
 import { useCompare } from "../context/CompareContext";
+import { ContactSellerModal } from "./ContactSellerModal";
+import { BookingModal } from "./luxura/BookingModal";
 
 const FUEL_LABELS: Record<string, string> = { petrol: "Petrol", diesel: "Diesel", electric: "Electric", cng: "CNG", hybrid: "Hybrid" };
 const TRANSMISSION_LABELS: Record<string, string> = { manual: "Manual", automatic: "Automatic", amt: "AMT", cvt: "CVT" };
@@ -16,6 +18,8 @@ export function VehicleCard({ listing }: { listing: VehicleListing }) {
   const toggleFavourite = useToggleFavourite();
   const { compareList, addToCompare, removeFromCompare } = useCompare();
   const [authOpen, setAuthOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
   const cover = listing?.images?.find((img) => img.is_cover) ?? listing?.images?.[0];
 
   const inCompare = compareList.some(c => c.id === listing?.id);
@@ -48,10 +52,11 @@ export function VehicleCard({ listing }: { listing: VehicleListing }) {
 
   return (
     <>
-      <Link
-        to={`/cars/${listing.slug}`}
-        className="group bg-white border border-stone-200 hover:border-blue-500/40 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col justify-between shadow-xs hover:shadow-lg hover:-translate-y-1"
-      >
+      <div className="group bg-white border border-stone-200 hover:border-blue-500/40 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col justify-between shadow-xs hover:shadow-lg hover:-translate-y-1">
+        <Link
+          to={`/cars/${listing.slug}`}
+          className="flex flex-col flex-1"
+        >
         {/* Image Stage */}
         <div className="relative h-40 sm:h-44 bg-stone-100 overflow-hidden">
           {cover ? (
@@ -167,20 +172,64 @@ export function VehicleCard({ listing }: { listing: VehicleListing }) {
               )}
             </div>
             <div className="text-right">
-              <span className="text-[10px] font-bold text-blue-700 group-hover:translate-x-0.5 transition-transform inline-block">
-                View Inspection &rarr;
+              <span className="text-[11px] font-bold text-blue-700 group-hover:text-blue-900 group-hover:translate-x-0.5 transition-transform inline-block">
+                Inspect Vehicle &rarr;
               </span>
             </div>
           </div>
         </div>
-
-        {/* Action Grid Footer */}
-        <div className="border-t border-stone-100">
-          <span className="w-full py-2.5 bg-stone-50 group-hover:bg-blue-900 text-stone-700 group-hover:text-white font-extrabold text-[11px] tracking-wider uppercase transition-all duration-300 flex justify-center items-center">
-            Inspect Vehicle
-          </span>
-        </div>
       </Link>
+
+        {/* Dual Direct Action Footer: Contact Seller & Buy Now */}
+        <div className="p-2.5 sm:p-3 bg-stone-50 border-t border-stone-200/80 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setContactOpen(true);
+            }}
+            className="w-full py-2 px-2 bg-white hover:bg-blue-50 text-blue-950 hover:text-blue-700 border border-stone-200 hover:border-blue-300 rounded-xl font-bold text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+            title="Contact seller directly via Call, WhatsApp, or Message"
+          >
+            <Phone size={13} className="text-blue-700 shrink-0" />
+            <span className="truncate">Contact Seller</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setBookingOpen(true);
+            }}
+            className="w-full py-2 px-2 bg-blue-900 hover:bg-blue-950 text-white rounded-xl font-bold text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-blue-950/20 cursor-pointer active:scale-95"
+            title="Buy Now • Reserve directly with seller @ ₹999 refundable token"
+          >
+            <ShieldCheck size={13} className="text-sky-300 shrink-0" />
+            <span className="truncate">Buy Now</span>
+          </button>
+        </div>
+      </div>
+
+      {contactOpen && (
+        <ContactSellerModal
+          isOpen={contactOpen}
+          onClose={() => setContactOpen(false)}
+          listing={listing}
+        />
+      )}
+
+      {bookingOpen && (
+        <BookingModal
+          isOpen={bookingOpen}
+          onClose={() => setBookingOpen(false)}
+          onSuccess={() => setBookingOpen(false)}
+          brand={listing.brand}
+          model={listing.model}
+          listingId={listing.id}
+        />
+      )}
 
       {authOpen && (
         <AuthModal

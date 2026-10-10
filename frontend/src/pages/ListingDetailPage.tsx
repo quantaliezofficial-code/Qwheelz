@@ -149,6 +149,14 @@ export function ListingDetailPage() {
   const isPending = listing.status === "pending_review";
   const images = listing?.images?.length > 0 ? listing.images : [{ id: "fake", url: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=1200", is_cover: true }];
 
+  const sellerName = listing.seller?.business_name || listing.seller?.name || "Direct Car Owner";
+  const sellerPhone = listing.seller?.phone || "+919839012345";
+  const cleanPhone = sellerPhone.replace(/[^0-9]/g, "");
+  const waPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+  const sellerWaUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(
+    `Hello ${sellerName}, I am interested in your ${listing.year} ${listing.brand} ${listing.model} (${formatINR(Number(listing.price))}) in ${listing.city} listed on Qwheelz. Is it available for inspection / test drive?`
+  )}`;
+
   const handleEnquiry = async () => {
     if (!message.trim()) return;
     try {
@@ -652,51 +660,51 @@ export function ListingDetailPage() {
                 ) : null}
               </div>
 
-              {/* Qwheelz Managed Brokerage Desk Info */}
+              {/* Direct Verified Seller Info */}
               <div className="py-4 border-b border-stone-100">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] text-blue-900 font-extrabold uppercase tracking-widest bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
-                    Qwheelz Managed Brokerage
+                    Direct Contact • 0% Brokerage
                   </span>
-                  <VerifiedPlate label="ADMIN CERTIFIED" />
+                  <VerifiedPlate label={listing.seller?.role === "dealer" ? "VERIFIED DEALER" : "DIRECT OWNER"} />
                 </div>
                 
-                <div className="p-3 bg-stone-50 border border-stone-200/80 rounded-xl mt-2">
-                  <div className="flex items-center gap-2.5 mb-1.5">
-                    <div className="w-8 h-8 rounded-lg bg-blue-900 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
-                      QZ
+                <div className="p-3.5 bg-stone-50 border border-stone-200/80 rounded-2xl mt-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-900 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
+                      {sellerName[0]?.toUpperCase() || "O"}
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-stone-900">Qwheelz Brokerage & Inspection Hub</p>
-                      <p className="text-[10px] text-stone-500">Dedicated Broker Facilitation • Zero Direct Hassle</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-stone-900 truncate">
+                        {sellerName}
+                      </p>
+                      <p className="text-[11px] text-stone-500 flex items-center gap-1">
+                        <MapPin size={11} className="text-blue-700 shrink-0" />
+                        <span>{listing.city || "Lucknow"} • Verified Car</span>
+                      </p>
                     </div>
                   </div>
-                  <p className="text-[11px] text-stone-600 leading-relaxed border-t border-stone-200/60 pt-2 mt-2">
-                    Managed Deal: All vehicle inspections, negotiations, token escrow, and RTO paperwork are handled directly by Qwheelz Admin specialists.
+                  <p className="text-[11px] text-stone-600 leading-relaxed border-t border-stone-200/60 pt-2.5 mt-2.5">
+                    Connect directly with the vehicle owner/dealer. Schedule physical inspection, test drives, and complete purchase with zero broker commission.
                   </p>
-                </div>
-
-                <div className="mt-2.5 text-xs text-stone-500 flex items-center gap-1.5">
-                  <MapPin size={13} className="text-blue-700 shrink-0" />
-                  <span>Physical Hub: <strong className="text-stone-800">Jankipuram near JB Lawn, Lucknow</strong></span>
                 </div>
               </div>
 
-              {/* Direct Broker Instant Contact Buttons */}
+              {/* Direct Seller Instant Contact Buttons */}
               <div className="grid grid-cols-2 gap-2 mt-3 mb-4">
                 <a
-                  href="tel:+915224008888"
-                  className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-900 font-bold text-xs uppercase tracking-wider rounded-xl border border-stone-200 transition-colors"
+                  href={`tel:${sellerPhone}`}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-900 font-bold text-xs uppercase tracking-wider rounded-xl border border-stone-200 transition-colors shadow-xs active:scale-95"
                 >
                   <Phone size={14} className="text-blue-700" />
-                  <span>Call Broker</span>
+                  <span>Call Seller</span>
                 </a>
 
                 <a
-                  href={`https://wa.me/919839012345?text=${encodeURIComponent(`Hello Qwheelz Broker, I am interested in booking/inspecting the ${listing.year} ${listing.brand} ${listing.model} (${formatINR(Number(listing.price))}) in ${listing.city} (ID: ${listing.id}). Please assist me.`)}`}
+                  href={sellerWaUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-900 font-bold text-xs uppercase tracking-wider rounded-xl border border-blue-200 transition-colors"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-900 font-bold text-xs uppercase tracking-wider rounded-xl border border-blue-200 transition-colors shadow-xs active:scale-95"
                 >
                   <MessageCircle size={14} className="text-blue-700" />
                   <span>WhatsApp</span>
@@ -709,7 +717,7 @@ export function ListingDetailPage() {
                 </Link>
               ) : sent ? (
                 <p className="mt-4 rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800 font-medium">
-                  Request sent! A dedicated Qwheelz Broker will contact you shortly.
+                  Direct message sent! The seller will contact you shortly.
                 </p>
               ) : (
                 <div className="mt-2">
@@ -717,8 +725,8 @@ export function ListingDetailPage() {
                     <div className="mb-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
                       <Check className="w-5 h-5 text-blue-600 shrink-0" />
                       <div>
-                        <p className="text-sm font-bold text-blue-900">Vehicle Reserved</p>
-                        <p className="text-xs text-blue-700 mt-1">You have successfully blocked this vehicle. Our broker team will contact you to finalize the transaction.</p>
+                        <p className="text-sm font-bold text-blue-900">Vehicle Reserved Directly!</p>
+                        <p className="text-xs text-blue-700 mt-1">You have successfully blocked this vehicle directly with the seller. Connect to finalize transaction.</p>
                       </div>
                     </div>
                   ) : (
@@ -726,13 +734,13 @@ export function ListingDetailPage() {
                       <button
                         type="button"
                         onClick={() => setBookingOpen(true)}
-                        className="w-full bg-blue-900 hover:bg-blue-950 text-white font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-xl shadow-md shadow-blue-950/20 transition-all flex justify-center items-center gap-2 cursor-pointer"
+                        className="w-full bg-blue-900 hover:bg-blue-950 text-white font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-xl shadow-md shadow-blue-950/20 transition-all flex justify-center items-center gap-2 cursor-pointer active:scale-95"
                       >
                         <ShieldCheck className="w-5 h-5 text-sky-300" />
-                        <span>Book this Vehicle @ ₹999</span>
+                        <span>Buy Now • Reserve @ ₹999</span>
                       </button>
                       <p className="text-[11px] text-stone-500 text-center flex items-center justify-center gap-1">
-                        <Check className="w-3 h-3 text-blue-600" /> Fully refundable • Reserve for 48 hours with Broker Desk
+                        <Check className="w-3 h-3 text-blue-600" /> 100% Fully refundable • Locks vehicle for 48 hours directly with seller
                       </p>
 
                       <div className="grid grid-cols-3 gap-2 pt-1.5">
@@ -775,13 +783,13 @@ export function ListingDetailPage() {
                   )}
 
                   <p className="text-xs font-bold text-stone-900 uppercase tracking-wider mb-2 mt-4">
-                    Inquire with Broker Desk
+                    Send Direct Message to Seller
                   </p>
                   <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     rows={3}
-                    placeholder="Ask Qwheelz Broker regarding test drive timing, RTO transfer, or home delivery..."
+                    placeholder={`Ask ${sellerName} regarding test drive timing, car condition, or inspection visit...`}
                     className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:border-blue-600 focus:outline-none custom-scrollbar resize-none placeholder:text-stone-400"
                   />
                   {!user ? (
@@ -790,7 +798,7 @@ export function ListingDetailPage() {
                       onClick={() => setAuthOpen(true)}
                       className="w-full py-3 mt-2.5 bg-blue-900 hover:bg-blue-950 text-white font-bold text-xs tracking-wider uppercase rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
                     >
-                      <span>Sign In to Contact Broker</span>
+                      <span>Sign In to Message Seller</span>
                     </button>
                   ) : (
                     <button
@@ -799,7 +807,7 @@ export function ListingDetailPage() {
                       disabled={createEnquiry.isPending || !message.trim()}
                       className="w-full py-3 mt-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs tracking-wider uppercase rounded-xl shadow-md disabled:opacity-50 transition-all cursor-pointer"
                     >
-                      {createEnquiry.isPending ? "Submitting Inquiry…" : "Send to Qwheelz Broker"}
+                      {createEnquiry.isPending ? "Submitting Message…" : "Send Message to Seller"}
                     </button>
                   )}
                   {createEnquiry.isError && (
@@ -983,25 +991,25 @@ export function ListingDetailPage() {
       {/* Mobile Fixed Contact & Booking Bar */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-200 p-3 shadow-2xl flex items-center justify-between gap-2">
         <div className="min-w-0 pr-1">
-          <p className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">Fixed Price</p>
+          <p className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">Direct Price</p>
           <p className="text-base sm:text-lg font-black text-stone-900 leading-tight truncate">{formatINR(Number(listing.price))}</p>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
           <a
-            href="tel:+915224008888"
+            href={`tel:${sellerPhone}`}
             className="p-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl border border-stone-200 flex items-center justify-center transition-colors"
-            title="Call Broker"
+            title="Call Seller"
           >
             <Phone size={16} className="text-blue-700" />
           </a>
 
           <a
-            href={`https://wa.me/919839012345?text=${encodeURIComponent(`Hello Qwheelz Broker, I am interested in ${listing.title} (${formatINR(Number(listing.price))}). Please share details.`)}`}
+            href={sellerWaUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="p-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl border border-blue-200 flex items-center justify-center transition-colors"
-            title="WhatsApp Broker"
+            title="WhatsApp Seller"
           >
             <MessageCircle size={16} />
           </a>
@@ -1012,7 +1020,7 @@ export function ListingDetailPage() {
             className="px-3.5 py-2.5 bg-blue-900 hover:bg-blue-950 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <ShieldCheck size={14} className="text-sky-300" />
-            <span>Book @ ₹999</span>
+            <span>Buy Now @ ₹999</span>
           </button>
         </div>
       </div>
